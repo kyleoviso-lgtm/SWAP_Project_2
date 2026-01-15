@@ -14,6 +14,17 @@ body {
     overflow: hidden;
 }
 
+/* Section Separator */
+.section-separator {
+    width: 100%;
+    height: 4px;
+    background-color: #23272a;
+
+    border-radius: 2px;
+
+    margin: 10px 0px;
+}
+
 /* Sidebar */
 .sidebar {
     width: 260px;

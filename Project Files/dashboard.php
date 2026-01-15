@@ -76,6 +76,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-content">
+            
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -114,6 +115,8 @@
                     <div class="stat-label">Products</div>
                 </div>
             </div>
+
+            <div class="section-separator"></div>
 
             <!-- Charts Section -->
             <div class="charts-row">
