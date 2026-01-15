@@ -19,11 +19,11 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a href="dashboard.php" class="nav-item active">
+            <a href="dashboard.php" class="nav-item">
                 <span class="icon">📊</span>
                 <span>Overview</span>
             </a>
-            <a href="dashboard_product_management.php" class="nav-item">
+            <a href="dashboard_product_management.php" class="nav-item active">
                 <span class="icon">📦</span>
                 <span>Product Management</span>
             </a>
@@ -61,7 +61,7 @@
         <!-- Top Bar -->
         <header class="topbar">
             <div class="topbar-left">
-                <h1>Dashboard Overview</h1>
+                <h1>Product Management</h1>
             </div>
             <div class="topbar-right">
                 <button class="icon-btn">
@@ -77,45 +77,22 @@
         <!-- Dashboard Content -->
         <div class="dashboard-content">
             
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-icon revenue">💵</span>
-                        <span class="stat-trend positive">+12.5%</span>
-                    </div>
-                    <div class="stat-value">$24,563</div>
-                    <div class="stat-label">Total Revenue</div>
+            <!-- Product management section -->
+            <div class="product-management-CRUD-section">
+                <div class="product-management-CRUD-header">
+                    <h3>Product Management</h3>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-icon orders">📦</span>
-                        <span class="stat-trend positive">+8.2%</span>
+                <div class="product-management-CRUD-content">
+                    <div class="product-management-CRUD-operations-column">
+                            
                     </div>
-                    <div class="stat-value">342</div>
-                    <div class="stat-label">Orders</div>
-                </div>
 
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-icon customers">👥</span>
-                        <span class="stat-trend positive">+18.4%</span>
-                    </div>
-                    <div class="stat-value">1,429</div>
-                    <div class="stat-label">Customers</div>
-                </div>
+                    <div class="content-vertical-separator"></div>
 
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-icon products">📊</span>
-                        <span class="stat-trend negative">-2.1%</span>
-                    </div>
-                    <div class="stat-value">89</div>
-                    <div class="stat-label">Products</div>
+                    <div class="product-management-CRUD-display-column"></div>
                 </div>
             </div>
-
+            
             <div class="section-separator"></div>
 
             <!-- Charts Section -->
