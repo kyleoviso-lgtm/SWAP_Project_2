@@ -82,15 +82,9 @@
                 <div class="product-management-CRUD-header">
                     <h3>Product Management</h3>
                 </div>
-                <div class="product-management-CRUD-content">
-                    <div class="product-management-CRUD-operations-column">
-                            
-                    </div>
+                <table>
 
-                    <div class="content-vertical-separator"></div>
-
-                    <div class="product-management-CRUD-display-column"></div>
-                </div>
+                </table>
             </div>
             
             <div class="section-separator"></div>
@@ -173,74 +167,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="section-separator"></div>
-
-            <!-- Recent Orders -->
-            <div class="table-card">
-                <div class="card-header">
-                    <h3>Recent Orders</h3>
-                    <button class="btn-secondary">View All</button>
-                </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Product</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#ORD-2847</td>
-                                <td>Sarah Johnson</td>
-                                <td>Wireless Headphones</td>
-                                <td>$129.99</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 12, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2846</td>
-                                <td>Mike Wilson</td>
-                                <td>Gaming Mouse</td>
-                                <td>$79.99</td>
-                                <td><span class="status-badge processing">Processing</span></td>
-                                <td>Jan 12, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2845</td>
-                                <td>Emily Davis</td>
-                                <td>Laptop Stand</td>
-                                <td>$45.50</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 11, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2844</td>
-                                <td>Alex Brown</td>
-                                <td>USB-C Cable</td>
-                                <td>$19.99</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                                <td>Jan 11, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2843</td>
-                                <td>Lisa Anderson</td>
-                                <td>Mechanical Keyboard</td>
-                                <td>$159.99</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 10, 2026</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </main>
 </body>
 </html>
-
