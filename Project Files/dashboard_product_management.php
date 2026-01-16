@@ -26,6 +26,7 @@ $result = $conn->query($sql);
     <title>Store Dashboard</title>
     <link rel="stylesheet" href="css/dashboard.css">    
 </head>
+
 <body>
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
@@ -102,55 +103,79 @@ $result = $conn->query($sql);
                 <div class="product-management-CRUD-header">
                     <h3>Product Management</h3>
 
-                    <div class="pm-CRUD-header-actions">
-                        <input type="text" name="Search Bar" class="search-bar" placeholder="Search bar">
+                    <div class="header-actions">
+                        <input type="text" name="Search Bar" class="search-bar" placeholder="Search Name" id="searchBar">
                         <button class="btn-secondary add-item-btn">Add Item</button>
                     </div>
                 </div>
                 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Item ID</th>
-                            <th>Name</th>
-                            <th>Price ($)</th>
-                            <th>Description</th>
-                            <th class="available-clmn">Availability</th>
-                            <th class="edit-clmn">Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>";
-                                echo "<td>" . htmlspecialchars($row['IID']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                echo "<td>$" . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['description']) . "</td>";
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Item ID</th>
+                                <th>Name</th>
+                                <th>Price ($)</th>
+                                <th>Description</th>
+                                <th class="available-clmn">Availability</th>
+                                <th class="edit-clmn">Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td>" . htmlspecialchars($row['IID']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                    echo "<td>$" . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['description']) . "</td>";
 
-                                // Check availability
-                                if ($row['availability'] == 0) {
-                                    echo "<td class='availability-cell'><span class='status-badge pending'>Unavailable</span></td>";
-                                } else {
-                                    echo "<td class='availability-cell'><span class='status-badge completed'>Available</span></td>";
+                                    // Check availability
+                                    if ($row['availability'] == 0) {
+                                        echo "<td class='availability-cell'><span class='status-badge pending'>Unavailable</span></td>";
+                                    } else {
+                                        echo "<td class='availability-cell'><span class='status-badge completed'>Available</span></td>";
+                                    }
+
+                                    // Edit button
+                                    echo "<td class='edit-btn-cell'><a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a></td>";
+
+                                    echo "</tr>";
+
+                                    echo "</tr>";
                                 }
-
-                                // Edit button
-                                echo "<td class='edit-btn-cell'><a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a></td>";
-
-                                echo "</tr>";
-
-                                echo "</tr>";
+                            } else {
+                                echo "<tr><td colspan='5'>No items found</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='5'>No items found</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
+
+            <!-- JavaScript for Search Filter -->
+            <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const searchBar = document.getElementById('searchBar');
+                const tableBody = document.querySelector('.data-table tbody');
+
+                searchBar.addEventListener('input', function() {
+                    const filter = this.value.toLowerCase();
+                    const rows = tableBody.querySelectorAll('tr');
+
+                    rows.forEach(row => {
+                        const nameCell = row.cells[1]; // Name is the second column
+                        if (nameCell) {
+                            const nameText = nameCell.textContent.toLowerCase();
+                            row.style.display = nameText.includes(filter) ? '' : 'none';
+                        }
+                    });
+                });
+            });
+            </script>
+
             
             <div class="section-separator"></div>
 
