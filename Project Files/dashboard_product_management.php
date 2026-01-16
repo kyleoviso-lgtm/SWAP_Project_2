@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<?php
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "mydb"; // your schema name
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch data from item table
+$sql = "SELECT IID, name, price, description, availability FROM item";
+$result = $conn->query($sql);
+?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Dashboard</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/dashboard.css">    
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -81,10 +101,55 @@
             <div class="product-management-CRUD-section">
                 <div class="product-management-CRUD-header">
                     <h3>Product Management</h3>
-                </div>
-                <table>
 
+                    <div class="pm-CRUD-header-actions">
+                        <input type="text" name="Search Bar" class="search-bar" placeholder="Search bar">
+                        <button class="btn-secondary add-item-btn">Add Item</button>
+                    </div>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Name</th>
+                            <th>Price ($)</th>
+                            <th>Description</th>
+                            <th class="available-clmn">Availability</th>
+                            <th class="edit-clmn">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($row['IID']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                echo "<td>$" . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['description']) . "</td>";
+
+                                // Check availability
+                                if ($row['availability'] == 0) {
+                                    echo "<td class='availability-cell'><span class='status-badge pending'>Unavailable</span></td>";
+                                } else {
+                                    echo "<td class='availability-cell'><span class='status-badge completed'>Available</span></td>";
+                                }
+
+                                // Edit button
+                                echo "<td class='edit-btn-cell'><a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a></td>";
+
+                                echo "</tr>";
+
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='5'>No items found</td></tr>";
+                        }
+                        ?>
+                    </tbody>
                 </table>
+
             </div>
             
             <div class="section-separator"></div>

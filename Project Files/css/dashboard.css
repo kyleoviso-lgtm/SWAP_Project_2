@@ -293,7 +293,7 @@ body {
     flex-direction: column;
     background-color: #36393f;
 
-    padding: 4px;
+    padding: 6px 10px;
 
     border-radius: 8px;
     border: solid #202225 1px;
@@ -304,7 +304,9 @@ body {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+    
     padding: 6px 10px;
+    margin: 10px 2px;
 }
 
 .product-management-CRUD-content {
@@ -470,6 +472,20 @@ body {
     background-color: #2c2f33;
 }
 
+.data-table .available-clmn {
+    width: 10%;
+
+    text-align: center;
+}
+
+.data-table .edit-clmn {
+    text-align: center;
+
+    width: 10%;
+    white-space: nowrap;
+    padding: 0px 10px;   
+}
+
 .data-table th {
     padding: 12px 16px;
     text-align: left;
@@ -487,12 +503,41 @@ body {
     color: #dcddde;
 }
 
+.data-table .edit-btn-cell {
+    text-align: center;
+}
+
+.data-table .edit-btn {
+    background-color: #2c2f33;
+    color: white;
+    
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    transition: background-color 0.2s;
+}
+
 .data-table tbody tr {
     transition: background-color 0.2s;
+    
+    padding: 6px 0px;
 }
 
 .data-table tbody tr:hover {
     background-color: #2c2f33;
+}
+
+.data-table tbody tr:hover .edit-btn {
+    background-color: #5865f2;
+}
+
+.data-table tbody tr:hover .edit-btn:hover {
+    background-color: #3d46a8;
+}
+
+.data-table .availability-cell {
+    text-align: center;
 }
 
 .status-badge {
