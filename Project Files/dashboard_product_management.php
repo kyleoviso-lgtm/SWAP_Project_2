@@ -108,7 +108,8 @@ $result = $conn->query($sql);
                             <input type="text" name="Search Bar" class="search-bar" placeholder="Search Name" id="searchBar" >
                             <button type="button" class="clear-btn" id="clearBtn" style="display: none;">X</button>
                         </div>
-                        <button class="btn-secondary add-item-btn">Add Item</button>
+                        <button class="btn-secondary add-item-btn" onclick="location.href='add_item.php'">Add Item</button>
+
                     </div>
                 </div>
                 
