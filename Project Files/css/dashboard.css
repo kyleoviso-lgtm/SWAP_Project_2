@@ -327,6 +327,7 @@ body {
     width: 300px;
     outline: none;
     border-radius: 12px;
+    border: none;
     box-shadow: none;
     appearance: none;
 
@@ -340,6 +341,28 @@ body {
 .search-bar:focus {
     border-color: #2c2f33;
     box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+.product-management-CRUD-header .clear-btn:hover{
+    background-color: #2c2f33;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+
+.search-bar-container {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.product-management-CRUD-header .search-bar-container .clear-btn {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+
+    border-radius: 100%;
+    border: none;
+
+    background-color: #2c2f33;
+    color: white;
+    transition: background-color 0.2s, border 0.2s;
 }
 
 .product-management-CRUD-content {
@@ -519,7 +542,7 @@ body {
     text-align: center;
 }
 
-.data-table .edit-clmn {
+.data-table .actions-clmn {
     text-align: center;
 
     width: 10%;
@@ -538,13 +561,17 @@ body {
 }
 
 .data-table td {
-    padding: 16px;
+    padding: 10px 4px;
     border-top: 1px solid #202225;
     font-size: 14px;
     color: #dcddde;
 }
 
-.data-table .edit-btn-cell {
+.data-table .action-btn-cell {
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+
     text-align: center;
 }
 
@@ -555,6 +582,22 @@ body {
     padding: 10px 18px;
 
     border-radius: 8px;
+
+    transition: background-color 0.2s;
+}
+
+.data-table .delete-btn {
+    background-color: #ed4245;
+    color: white;
+
+    padding: 10px 18px;
+    border-radius: 8px;
+
+    border: none;
+    box-shadow: none;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
 
     transition: background-color 0.2s;
 }
@@ -577,6 +620,14 @@ body {
 
 .data-table tbody tr:hover .edit-btn:hover {
     background-color: #3d46a8;
+}
+
+.data-table tbody tr:hover .delete-btn {
+    background-color: crimson;
+}
+
+.data-table tbody tr .delete-btn:hover {
+    background-color: rgb(171, 19, 19);
 }
 
 .data-table .availability-cell {

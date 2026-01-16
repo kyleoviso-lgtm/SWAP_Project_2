@@ -104,7 +104,10 @@ $result = $conn->query($sql);
                     <h3>Product Management</h3>
 
                     <div class="header-actions">
-                        <input type="text" name="Search Bar" class="search-bar" placeholder="Search Name" id="searchBar">
+                        <div class="search-bar-container">
+                            <input type="text" name="Search Bar" class="search-bar" placeholder="Search Name" id="searchBar" >
+                            <button type="button" class="clear-btn" id="clearBtn" style="display: none;">X</button>
+                        </div>
                         <button class="btn-secondary add-item-btn">Add Item</button>
                     </div>
                 </div>
@@ -118,7 +121,7 @@ $result = $conn->query($sql);
                                 <th>Price ($)</th>
                                 <th>Description</th>
                                 <th class="available-clmn">Availability</th>
-                                <th class="edit-clmn">Edit</th>
+                                <th class="actions-clmn">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -138,10 +141,14 @@ $result = $conn->query($sql);
                                         echo "<td class='availability-cell'><span class='status-badge completed'>Available</span></td>";
                                     }
 
-                                    // Edit button
-                                    echo "<td class='edit-btn-cell'><a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a></td>";
-
-                                    echo "</tr>";
+                                    // Edit button and delete button
+                                    echo "<td class='action-btn-cell'>
+                                                <a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a>
+                                                <form method='post' action='delete_item.php' style='display:inline; margin:0;'>
+                                                    <input type='hidden' name='IID' value='" . htmlspecialchars($row['IID']) . "'>
+                                                    <button type='submit' class='delete-btn'>Delete</button>
+                                                </form>
+                                            </td>";
 
                                     echo "</tr>";
                                 }
@@ -157,21 +164,54 @@ $result = $conn->query($sql);
 
             <!-- JavaScript for Search Filter -->
             <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const searchBar = document.getElementById('searchBar');
-                const tableBody = document.querySelector('.data-table tbody');
+                document.addEventListener("DOMContentLoaded", function() {
+    const searchBar = document.getElementById('searchBar');
+    const tableBody = document.querySelector('.data-table tbody');
+    const clearBtn = document.getElementById('clearBtn');
 
-                searchBar.addEventListener('input', function() {
-                    const filter = this.value.toLowerCase();
-                    const rows = tableBody.querySelectorAll('tr');
+    // Search filter function
+    const filterRows = () => {
+        const filter = searchBar.value.toLowerCase();
+        const rows = tableBody.querySelectorAll('tr');
+        let visibleCount = 0;
 
-                    rows.forEach(row => {
-                        const nameCell = row.cells[1]; // Name is the second column
+        rows.forEach(row => {
+            const nameCell = row.cells[1];
                         if (nameCell) {
                             const nameText = nameCell.textContent.toLowerCase();
-                            row.style.display = nameText.includes(filter) ? '' : 'none';
+                            if (nameText.includes(filter)) {
+                                row.style.display = '';
+                                visibleCount++;
+                            } else {
+                                row.style.display = 'none';
+                            }
                         }
                     });
+
+                    // Remove any previous "no items" row
+                    const noItemsRow = tableBody.querySelector('.no-items-row');
+                    if (noItemsRow) noItemsRow.remove();
+
+                    // If no rows are visible, add a "No items matched" row
+                    if (visibleCount === 0) {
+                        const colCount = tableBody.parentElement.querySelectorAll('thead th').length;
+                        const row = document.createElement('tr');
+                        row.classList.add('no-items-row');
+                        row.innerHTML = `<td colspan="${colCount}" style="text-align: center; color: #dcddde; font-size: 14px;">No items matched</td>`;
+                        tableBody.appendChild(row);
+                    }
+
+                    // Show/hide clear button
+                    clearBtn.style.display = searchBar.value ? 'block' : 'none';
+                };
+
+                searchBar.addEventListener('input', filterRows);
+
+                // Clear button functionality
+                clearBtn.addEventListener('click', () => {
+                    searchBar.value = '';
+                    filterRows();
+                    searchBar.focus();
                 });
             });
             </script>
