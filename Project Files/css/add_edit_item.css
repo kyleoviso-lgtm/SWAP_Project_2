@@ -340,6 +340,30 @@ body {
     color: #72767d;
 }
 
+.warning-box {
+    background-color: rgba(250, 166, 26, 0.1);
+    border: 1px solid rgba(250, 166, 26, 0.3);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 10px 0px;
+}
+
+.warning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #faa61a;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.warning-box p {
+    font-size: 13px;
+    color: #dcddde;
+    line-height: 1.5;
+}
+
 .form-actions {
     display: flex;
     gap: 12px;

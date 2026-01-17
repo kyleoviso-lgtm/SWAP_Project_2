@@ -299,5 +299,21 @@ $result = $conn->query($sql);
                 </div>
             </div>
     </main>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const deleteForms = document.querySelectorAll("form[action='delete_item.php']");
+
+        deleteForms.forEach(form => {
+            form.addEventListener("submit", function(e) {
+                const confirmed = confirm("Are you sure you want to delete this item?");
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+    </script>
+
 </body>
 </html>

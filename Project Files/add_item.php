@@ -41,7 +41,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Item - Store Dashboard</title>
-    <link rel="stylesheet" href="css/add_item.css">
+    <link rel="stylesheet" href="css/add_edit_item.css">
 </head>
 <body>
     <aside class="sidebar">
@@ -179,7 +179,6 @@ $conn->close();
                                 Cancel
                             </button>
                             <button type="submit" class="btn-submit">
-                                <span class="btn-icon">✓</span>
                                 Add Product
                             </button>
                         </div>
