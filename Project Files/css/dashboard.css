@@ -14,7 +14,7 @@ body {
     overflow: hidden;
 }
 
-/* Section Separator */
+/* Section Separators */
 .section-separator {
     width: 100%;
     height: 6px;
@@ -23,6 +23,16 @@ body {
     border-radius: 4px;
 
     margin: 20px 0px;
+}
+
+.section-separator-minor {
+    width: 100%;
+    height: 1px;
+    background-color: #23272a;
+
+    border-radius: 1px;
+
+    margin: 10px 0px;
 }
 
 .content-vertical-separator {
@@ -302,15 +312,15 @@ body {
 }
 
 .product-management-CRUD-header {
-    height: 1;
+    height: 40px;
     white-space: nowrap;
     width: 100%;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     
-    padding: 6px 10px;
+    padding: 0px 10px;
     margin: 6px 2px;
 }
 
@@ -321,7 +331,8 @@ body {
     gap: 12px;
 }
 
-.product-management-CRUD-header .search-bar {
+.search-bar {
+    height: 38px;
     background-color: #2c2f33;
     color: #dcddde;
     width: 300px;
@@ -333,7 +344,7 @@ body {
 
     font-size: 14px;
     
-    padding: 6px 12px;
+    padding: 0px 12px;
 
     transition: border-color 0.1s, box-shadow 0.1s;
 }
@@ -643,6 +654,127 @@ body {
     text-align: center;
 }
 
+/* Order Tracking Page Specific classes */
+
+.active-order-header-actions {
+    display: flex;
+    flex-direction: row;
+    
+    padding: 8px 4px 4px 4px;
+
+    gap: 12px;
+}
+
+.order-history-header-actions {
+    display: flex;
+    flex-direction: row;
+    
+    padding: 8px 4px;
+
+    gap: 12px;
+}
+
+.btn-refresh {
+    padding: 8px 16px;
+    background-color: #2c2f33;
+    color: #dcddde;
+    border: 1px solid #202225;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    background-color: #23272a;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+.order-tracking-search-bar {
+    height: 38px;
+    background-color: #2c2f33;
+    color: #dcddde;
+    width: 300px;
+    outline: none;
+    border-radius: 12px;
+    border: 1px solid #202225;
+    box-shadow: none;
+    appearance: none;
+
+    font-size: 14px;
+    
+    padding: 0px 12px;
+
+    transition: border-color 0.1s, box-shadow 0.1s;
+}
+
+.order-tracking-search-bar:focus {
+    border-color: #2c2f33;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+
+.filter-select {
+    padding: 10px 16px;
+    background-color: #2c2f33;
+    border: 1px solid #202225;
+    border-radius: 6px;
+    color: #dcddde;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.view-btn {
+    width: 100%;
+    
+    background-color: #2c2f33;
+    color: #dcddde;
+    padding: 8px 16px;
+    margin: 0px 8px;
+
+    border-radius: 12px;
+    border: 1px solid #202225;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    background-color: #202225;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+
+.subsection-container {
+    display: flex;
+    flex-direction: column;
+
+    background-color: #36393f;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+    border: solid #202225 1px;
+}
+
+.order-count {
+    font-size: 14px;
+    color: #b9bbbe;
+    padding: 4px 12px;
+    background-color: #2c2f33;
+    border-radius: 12px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 4px 0px 2px 0px;
+}
+
+
+/* Status Badges */
 .status-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -664,6 +796,21 @@ body {
 .status-badge.pending {
     background-color: rgba(250, 166, 26, 0.15);
     color: #faa61a;
+}
+
+.status-badge.processing {
+    background-color: rgba(88, 101, 242, 0.15);
+    color: #5865f2;
+}
+
+.status-badge.pending {
+    background-color: rgba(250, 166, 26, 0.15);
+    color: #faa61a;
+}
+
+.status-badge.cancelled {
+    background-color: rgba(237, 66, 69, 0.15);
+    color: #ed4245;
 }
 
 .btn-secondary {
