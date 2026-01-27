@@ -27,6 +27,29 @@ $payments = $conn->query("SELECT PID, token FROM payment ORDER BY PID ASC");
 $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as address_display FROM address ORDER BY AID ASC");
 ?>
 
+<?php if (isset($_GET['error'])): ?>
+    <div class="error-banner">
+        <?php
+        switch ($_GET['error']) {
+            case 'duplicate_user':
+                echo "A user with that username or email already exists.";
+                break;
+            case 'missing_fields':
+                echo "Please fill in all required fields.";
+                break;
+            case 'invalid_email':
+                echo "Please enter a valid email address.";
+                break;
+            case 'password_mismatch':
+                echo "Passwords do not match.";
+                break;
+            default:
+                echo "An unexpected error occurred. Please try again.";
+        }
+        ?>
+    </div>
+<?php endif; ?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

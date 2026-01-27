@@ -846,6 +846,10 @@ body {
     border-radius: 12px;
 }
 
+.user-management-section-header {
+    margin: 2px 10px;
+}
+
 .user-management-header-actions {
     display: flex;
     flex-direction: row;
@@ -901,7 +905,7 @@ body {
     flex-direction: row;
     justify-content: center;
 
-    width: 40%;
+    max-width: 140px;
 
     padding: 4px 12px;
     border-radius: 12px;

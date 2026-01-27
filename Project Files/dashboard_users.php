@@ -106,7 +106,7 @@ $total_count = $result->num_rows;
 
                 <!-- User Management Table -->
                 <div class="user-management-section">
-                    <div class="section-header">
+                    <div class="user-management-section-header">
                         <div class="header-left">
                             <h2>All Users</h2>
                         </div>
