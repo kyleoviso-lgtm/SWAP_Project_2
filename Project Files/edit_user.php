@@ -14,6 +14,26 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Get UID from URL
+$UID = isset($_GET['UID']) ? $_GET['UID'] : '';
+
+// Fetch user data
+$user = null;
+if ($UID) {
+    $stmt = $conn->prepare("SELECT UID, username, email, role_ID, status_ID, payment_ID, address_ID FROM user WHERE UID = ?");
+    $stmt->bind_param("s", $UID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+}
+
+// If user not found, redirect back
+if (!$user) {
+    header("Location: dashboard_users.php");
+    exit();
+}
+
 // Fetch roles for dropdown
 $roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RID ASC");
 
@@ -27,11 +47,10 @@ $payments = $conn->query("SELECT PID, token FROM payment ORDER BY PID ASC");
 $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as address_display FROM address ORDER BY AID ASC");
 ?>
 
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add User - Store Dashboard</title>
+    <title>Edit User - Store Dashboard</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/add_user.css">
 </head>
@@ -39,31 +58,9 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
     <?php include 'sidebar.php'; ?>
 
     <main class="main-content">
-        <?php if (isset($_GET['error'])): ?>
-            <div class="error-banner">
-                <?php
-                switch ($_GET['error']) {
-                    case 'duplicate_user':
-                        echo "A user with that username or email already exists.";
-                        break;
-                    case 'missing_fields':
-                        echo "Please fill in all required fields.";
-                        break;
-                    case 'invalid_email':
-                        echo "Please enter a valid email address.";
-                        break;
-                    case 'password_mismatch':
-                        echo "Passwords do not match.";
-                        break;
-                    default:
-                        echo "An unexpected error occurred. Please try again.";
-                }
-                ?>
-            </div>
-        <?php endif; ?>
         <header class="topbar">
             <div class="topbar-left">
-                <h1>Add New User</h1>
+                <h1>Edit User</h1>
             </div>
             <div class="topbar-right">
                 <button class="icon-btn">
@@ -85,13 +82,13 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
             <div class="form-container">
                 <div class="form-card">
                     <div class="form-header">
-                        <h2>User Information</h2>
-                        <p>Fill in the details below to create a new user account</p>
+                        <h2>Edit User Information</h2>
+                        <p>Update the details below to modify this user account</p>
                     </div>
 
-                    <form method="POST" action="process_add_user.php" class="add-user-form">
-                        <input type="hidden" name="source" value="admin">
-                        <input type="hidden" name="return_url" value="dashboard_users.php">
+                    <form method="POST" action="process_edit_user.php" class="add-user-form">
+                        <input type="hidden" name="UID" value="<?php echo htmlspecialchars($user['UID']); ?>">
+                        
                         <!-- Username and Email Row -->
                         <div class="form-row">
                             <div class="form-group">
@@ -100,6 +97,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                                     type="text" 
                                     id="username" 
                                     name="username" 
+                                    value="<?php echo htmlspecialchars($user['username']); ?>"
                                     placeholder="Enter username"
                                     maxlength="45"
                                     required
@@ -113,6 +111,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                                     type="email" 
                                     id="email" 
                                     name="email" 
+                                    value="<?php echo htmlspecialchars($user['email']); ?>"
                                     placeholder="user@example.com"
                                     maxlength="100"
                                     required
@@ -120,29 +119,27 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                             </div>
                         </div>
 
-                        <!-- Password Row -->
+                        <!-- Password Row (Optional for editing) -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="password">Password <span class="required">*</span></label>
+                                <label for="password">New Password</label>
                                 <input 
                                     type="password" 
                                     id="password" 
                                     name="password" 
-                                    placeholder="Enter password"
-                                    required
+                                    placeholder="Leave blank to keep current password"
                                     minlength="8"
                                 >
-                                <span class="helper-text">Minimum 8 characters</span>
+                                <span class="helper-text">Only fill if changing password (min 8 characters)</span>
                             </div>
 
                             <div class="form-group">
-                                <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                                <label for="confirm_password">Confirm New Password</label>
                                 <input 
                                     type="password" 
                                     id="confirm_password" 
                                     name="confirm_password" 
-                                    placeholder="Re-enter password"
-                                    required
+                                    placeholder="Re-enter new password"
                                 >
                             </div>
                         </div>
@@ -152,11 +149,12 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                             <div class="form-group">
                                 <label for="role_ID">Role <span class="required">*</span></label>
                                 <select id="role_ID" name="role_ID" required>
-                                    <option value="" disabled selected>Select role</option>
+                                    <option value="" disabled>Select role</option>
                                     <?php
                                     if ($roles->num_rows > 0) {
                                         while ($role = $roles->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($role['RID']) . "'>" . htmlspecialchars(ucfirst($role['RoleName'])) . "</option>";
+                                            $selected = ($user['role_ID'] == $role['RID']) ? 'selected' : '';
+                                            echo "<option value='" . htmlspecialchars($role['RID']) . "' $selected>" . htmlspecialchars(ucfirst($role['RoleName'])) . "</option>";
                                         }
                                     }
                                     ?>
@@ -166,11 +164,12 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                             <div class="form-group">
                                 <label for="status_ID">Account Status <span class="required">*</span></label>
                                 <select id="status_ID" name="status_ID" required>
-                                    <option value="" disabled selected>Select status</option>
+                                    <option value="" disabled>Select status</option>
                                     <?php
                                     if ($statuses->num_rows > 0) {
                                         while ($status = $statuses->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($status['USID']) . "'>" . htmlspecialchars(ucfirst(str_replace('_', ' ', $status['status_name']))) . "</option>";
+                                            $selected = ($user['status_ID'] == $status['USID']) ? 'selected' : '';
+                                            echo "<option value='" . htmlspecialchars($status['USID']) . "' $selected>" . htmlspecialchars(ucfirst(str_replace('_', ' ', $status['status_name']))) . "</option>";
                                         }
                                     }
                                     ?>
@@ -195,7 +194,8 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                                     <?php
                                     if ($payments->num_rows > 0) {
                                         while ($payment = $payments->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($payment['PID']) . "'>Payment #" . htmlspecialchars($payment['PID']) . " (Token: " . htmlspecialchars($payment['token']) . ")</option>";
+                                            $selected = ($user['payment_ID'] == $payment['PID']) ? 'selected' : '';
+                                            echo "<option value='" . htmlspecialchars($payment['PID']) . "' $selected>Payment #" . htmlspecialchars($payment['PID']) . " (Token: " . htmlspecialchars($payment['token']) . ")</option>";
                                         }
                                     }
                                     ?>
@@ -210,7 +210,8 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                                     <?php
                                     if ($addresses->num_rows > 0) {
                                         while ($address = $addresses->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($address['AID']) . "'>" . htmlspecialchars($address['address_display']) . "</option>";
+                                            $selected = ($user['address_ID'] == $address['AID']) ? 'selected' : '';
+                                            echo "<option value='" . htmlspecialchars($address['AID']) . "' $selected>" . htmlspecialchars($address['address_display']) . "</option>";
                                         }
                                     }
                                     ?>
@@ -225,7 +226,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                             </button>
                             <button type="submit" class="btn-submit">
                                 <span class="btn-icon">✓</span>
-                                Create User
+                                Update User
                             </button>
                         </div>
                     </form>
@@ -233,15 +234,36 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
 
                 <div class="info-card">
                     <div class="info-header">
+                        <span class="info-icon">ℹ️</span>
+                        <h3>Current User Details</h3>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-row">
+                            <span class="detail-label">User ID:</span>
+                            <span class="detail-value"><?php echo htmlspecialchars($user['UID']); ?></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Username:</span>
+                            <span class="detail-value"><?php echo htmlspecialchars($user['username']); ?></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value"><?php echo htmlspecialchars($user['email']); ?></span>
+                        </div>
+                    </div>
+
+                    <div class="section-separator-minor"></div>
+
+                    <div class="info-header">
                         <span class="info-icon">💡</span>
-                        <h3>User Creation Tips</h3>
+                        <h3>Edit Tips</h3>
                     </div>
                     <ul class="info-list">
-                        <li>Username must be unique in the system</li>
-                        <li>Password will be securely hashed before storage</li>
-                        <li>User ID (UID) will be auto-generated as UUID</li>
-                        <li>Payment and Address are optional references</li>
-                        <li>Set status to "Active" for immediate access</li>
+                        <li>Username and email must remain unique</li>
+                        <li>Leave password fields blank to keep current password</li>
+                        <li>Changing role will affect user permissions immediately</li>
+                        <li>Status changes take effect on next login</li>
+                        <li>Payment and Address links are optional</li>
                     </ul>
 
                     <div class="section-separator-minor"></div>
@@ -252,49 +274,22 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                     </div>
                     <div class="role-descriptions">
                         <div class="role-desc">
-                            <strong>Admin:</strong> Full system access and management capabilities
+                            <strong>Admin:</strong> Full system access and management
                         </div>
                         <div class="role-desc">
-                            <strong>Individual:</strong> Standard customer with personal account
+                            <strong>Individual:</strong> Standard customer account
                         </div>
                         <div class="role-desc">
                             <strong>Enterprise:</strong> Business customer with bulk ordering
                         </div>
                     </div>
 
-                    <div class="section-separator-minor"></div>
-
-                    <div class="info-header">
-                        <span class="info-icon">📋</span>
-                        <h3>Account Statuses</h3>
-                    </div>
-                    <div class="role-descriptions">
-                        <div class="role-desc">
-                            <strong>Active:</strong> User can access the system normally
-                        </div>
-                        <div class="role-desc">
-                            <strong>Inactive:</strong> Account is disabled
-                        </div>
-                        <div class="role-desc">
-                            <strong>Pending Activation:</strong> Awaiting email confirmation
-                        </div>
-                        <div class="role-desc">
-                            <strong>Locked:</strong> Account locked due to security
-                        </div>
-                        <div class="role-desc">
-                            <strong>Suspended:</strong> Temporarily suspended
-                        </div>
-                        <div class="role-desc">
-                            <strong>Password Expired:</strong> Requires password reset
-                        </div>
-                    </div>
-
                     <div class="warning-box">
                         <div class="warning-header">
                             <span>⚠️</span>
-                            <span>Important</span>
+                            <span>Warning</span>
                         </div>
-                        <p>Admin accounts have full system access. Only create admin accounts for trusted personnel.</p>
+                        <p>Changes to user roles and status affect system access. Verify changes before submitting.</p>
                     </div>
                 </div>
             </div>
@@ -302,34 +297,28 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
     </main>
 
     <script>
-        // Password confirmation validation
         const form = document.querySelector('.add-user-form');
         const password = document.getElementById('password');
         const confirmPassword = document.getElementById('confirm_password');
 
         form.addEventListener('submit', function(e) {
-            if (password.value !== confirmPassword.value) {
-                e.preventDefault();
-                alert('Passwords do not match!');
-                confirmPassword.focus();
+            // Only validate if password is being changed
+            if (password.value || confirmPassword.value) {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    confirmPassword.focus();
+                    return false;
+                }
+                
+                if (password.value.length < 8) {
+                    e.preventDefault();
+                    alert('Password must be at least 8 characters!');
+                    password.focus();
+                    return false;
+                }
             }
         });
-
-        // Show password strength indicator
-        password.addEventListener('input', function() {
-            const strength = getPasswordStrength(this.value);
-            // You can add visual feedback here if needed
-        });
-
-        function getPasswordStrength(password) {
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-            if (/\d/.test(password)) strength++;
-            if (/[^a-zA-Z\d]/.test(password)) strength++;
-            return strength;
-        }
     </script>
 </body>
 </html>

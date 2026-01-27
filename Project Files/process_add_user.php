@@ -11,7 +11,7 @@ $dbname = "mydb";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . htmlspecialchars($conn->connect_error));
 }
 
 // --------------------
@@ -23,36 +23,42 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 // --------------------
-// 3. Collect and validate inputs
+// 3. Identify source safely
 // --------------------
-$source = $_POST['source'] ?? 'public'; // identify where this came from
-$return_url = $_POST['return_url'] ?? 'dashboard_users.php'; // default fallback
+// This controls where the user came from (admin panel, signup page, etc.)
+// and defines safe redirect destinations.
+$source = $_POST['source'] ?? 'signup'; // default public signup
+$redirects = [
+    'admin' => 'add_user.php',
+    'signup' => 'login.php',
+];
+$return_url = $redirects[$source] ?? 'index.php';
 
-// --- sanitize URL
-if (strpos($return_url, 'http') === 0 || strpos($return_url, '//') === 0) {
-    $return_url = 'dashboard_users.php';
-}
-
-// Required fields
+// --------------------
+// 4. Collect and validate inputs
+// --------------------
 $username = trim($_POST['username'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-    die("Error: All required fields must be filled.");
+    header("Location: {$return_url}?error=missing_fields");
+    exit();
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    die("Error: Invalid email format.");
+    header("Location: {$return_url}?error=invalid_email");
+    exit();
 }
 
 if ($password !== $confirm_password) {
-    die("Error: Passwords do not match.");
+    header("Location: {$return_url}?error=password_mismatch");
+    exit();
 }
 
 // --------------------
-// 4. Check for duplicates
+// 5. Check for duplicates
 // --------------------
 $check_stmt = $conn->prepare("SELECT COUNT(*) FROM user WHERE username = ? OR email = ?");
 $check_stmt->bind_param("ss", $username, $email);
@@ -62,19 +68,22 @@ $check_stmt->fetch();
 $check_stmt->close();
 
 if ($exists > 0) {
-    header("Location: " . $return_url . "?error=duplicate_user");
+    header("Location: {$return_url}?error=duplicate_user");
     exit();
 }
 
 // --------------------
-// 5. Hash password & create UUID
+// 6. Generate secure UUID
 // --------------------
-$password_hash = password_hash($password, PASSWORD_DEFAULT);
-$uuid_result = $conn->query("SELECT UUID() AS uuid");
-$uid = $uuid_result->fetch_assoc()['uuid'];
+$result = $conn->query("SELECT UUID() AS uuid");
+$uid = $result->fetch_assoc()['uuid'] ?? null;
+if (!$uid) {
+    header("Location: {$return_url}?error=uuid_failed");
+    exit();
+}
 
 // --------------------
-// 6. Assign role/status depending on source
+// 7. Determine roles, statuses, and optional FKs
 // --------------------
 if ($source === 'admin') {
     $role_ID = $_POST['role_ID'] ?? null;
@@ -82,15 +91,27 @@ if ($source === 'admin') {
     $payment_ID = !empty($_POST['payment_ID']) ? $_POST['payment_ID'] : null;
     $address_ID = !empty($_POST['address_ID']) ? $_POST['address_ID'] : null;
 } else {
-    // Default for public sign-up
-    $role_ID = 2;      // 2 = Individual
-    $status_ID = 3;    // 3 = pending_activation
+    // Default for public signup
+    $role_ID = 2;      // Individual
+    $status_ID = 3;    // Pending activation
     $payment_ID = null;
     $address_ID = null;
 }
 
+// Validate IDs are numeric (defense-in-depth)
+foreach (['role_ID', 'status_ID', 'payment_ID', 'address_ID'] as $var) {
+    if (isset($$var) && !is_null($$var) && !ctype_digit((string) $$var)) {
+        $$var = null; // Reset invalid input
+    }
+}
+
 // --------------------
-// 7. Insert user into database
+// 8. Hash password
+// --------------------
+$password_hash = password_hash($password, PASSWORD_DEFAULT);
+
+// --------------------
+// 9. Insert user securely
 // --------------------
 $stmt = $conn->prepare("
     INSERT INTO user (UID, username, email, password_hash, role_ID, status_ID, payment_ID, address_ID)
@@ -109,11 +130,14 @@ $stmt->bind_param(
     $address_ID
 );
 
+// --------------------
+// 10. Execute and redirect
+// --------------------
 if ($stmt->execute()) {
-    // Redirect back
-    header("Location: " . $return_url . "?success=1");
+    header("Location: {$return_url}?success=1");
     exit();
 } else {
+    // In production, log the error instead of displaying it
     echo "Database error: " . htmlspecialchars($stmt->error);
 }
 
