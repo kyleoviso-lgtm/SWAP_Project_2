@@ -264,6 +264,14 @@ body {
     background-color: rgba(254, 231, 92, 0.15);
 }
 
+.stat-icon.individual {
+    background-color: rgba(254, 231, 92, 0.15);
+}
+
+.stat-icon.enterprise {
+    background-color: rgba(88, 101, 242, 0.15);
+}
+
 .stat-icon.products {
     background-color: rgba(237, 66, 69, 0.15);
 }
@@ -333,7 +341,7 @@ body {
 
 .search-bar {
     height: 38px;
-    background-color: #2c2f33;
+    background-color: #23272a;
     color: #dcddde;
     width: 300px;
     outline: none;
@@ -581,7 +589,6 @@ body {
 
 .data-table td,
 .data-table th {
-    max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -596,12 +603,14 @@ body {
 }
 
 .data-table .edit-btn {
-    background-color: #2c2f33;
+    background-color: #282c30;
     color: white;
     
     padding: 10px 18px;
 
+    border: none;
     border-radius: 8px;
+    cursor: pointer;
 
     transition: background-color 0.2s;
 }
@@ -719,10 +728,17 @@ body {
     padding: 10px 16px;
     background-color: #2c2f33;
     border: 1px solid #202225;
-    border-radius: 6px;
+    border-radius: 10px;
     color: #dcddde;
     font-size: 14px;
     cursor: pointer;
+
+    transition: all 0.2s;
+}
+
+.filter-select:focus {
+    border-color: #2c2f33;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
 }
 
 .view-btn {
@@ -752,7 +768,20 @@ body {
 
     background-color: #36393f;
 
+    padding: 6px 2px;
+
+    border-radius: 8px;
+    border: solid #202225 1px;
+}
+
+.subsection-container-2 {
+    display: flex;
+    flex-direction: row;
+
+    background-color: #36393f;
+
     padding: 6px 10px;
+    gap: 12px;
 
     border-radius: 8px;
     border: solid #202225 1px;
@@ -773,6 +802,219 @@ body {
     margin: 4px 0px 2px 0px;
 }
 
+/* User Management Page specific classes*/
+
+.role-badge {
+    min-width: 100px;
+    max-width: 120px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.role-badge.admin {
+    background-color: rgba(242, 234, 88, 0.15);
+    color: #f2bf58;   
+}
+
+.role-badge.individual {
+    background-color: rgba(88, 242, 101, 0.15);
+    color: #58f28e;
+}
+
+.role-badge.enterprise {
+    background-color: rgba(88, 101, 242, 0.15);
+    color: #6d8bf6;
+}
+
+.role-badge.other {
+    background-color: rgba(200, 200, 200, 0.15);
+    color: #dcddde;
+}
+
+.user-management-section {
+    width: 100%;
+}
+
+.user-management-header-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+
+    padding: 4px 0px;
+    margin: 8px 0px;
+}
+
+.btn-add {
+    padding: 10px 20px;
+    background-color: #5865f2;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    transform: all 0.2s;
+}
+
+.btn-add:hover {
+    background-color: #3d46a8;
+}
+
+.user-view-btn {
+    background-color: #2c2f33;
+    color: #dcddde;
+    padding: 8px 16px;
+    margin: 0px 8px;
+
+    border-radius: 12px;
+    border: 1px solid #202225;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.user-view-btn:hover {
+    background-color: #202225;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+
+.user-status-badge {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    width: 40%;
+
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-status-badge.normal {
+    background-color: rgba(67, 181, 129, 0.15);
+    color: #43b581;
+}
+
+.user-status-badge.warning {
+    background-color: rgba(250, 166, 26, 0.15);
+    color: #faa61a;
+}
+
+.user-status-badge.critical {
+    background-color: rgba(237, 66, 69, 0.15);
+    color: #ed4245;
+}
+
+/* Info card classes */
+
+.info-card {
+    background-color: #2c2f33;
+    border: 1.5px dashed #202225;
+    border-radius: 20px;
+    margin: 10px 2px;
+    padding: 24px;
+    height: fit-content;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.info-icon {
+    font-size: 24px;
+}
+
+.info-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.detail-row {
+    display: flex;
+    gap: 8px;
+    margin: 3px 0px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #b9bbbe;
+    min-width: 80px;
+}
+
+.detail-value {
+    color: #dcddde;
+    font-size: 14px;
+    flex: 1;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.completed {
+    background-color: #43b581; /* green */
+    color: #ffffff;
+}
+
+.status-badge.pending {
+    background-color: #faa61a; /* orange/yellow */
+    color: #ffffff;
+}
+
+.warning-box {
+    background-color: rgba(250, 166, 26, 0.1);
+    border: 1px solid rgba(250, 166, 26, 0.3);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 10px 0;
+}
+
+.warning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #faa61a;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.warning-box p {
+    font-size: 13px;
+    color: #dcddde;
+    line-height: 1.5;
+}
 
 /* Status Badges */
 .status-badge {

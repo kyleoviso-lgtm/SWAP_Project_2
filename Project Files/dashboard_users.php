@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "mydb";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch users and their role names
+$sql = "SELECT 
+            u.UID, 
+            u.username, 
+            u.email, 
+            u.role_ID, 
+            r.RoleName AS role, 
+            s.status_name AS status
+        FROM user u
+        INNER JOIN roles r ON u.role_ID = r.RID
+        INNER JOIN user_stat s ON u.status_ID = s.USID
+        ORDER BY u.username ASC";
+$result = $conn->query($sql);
+
+// Count users by role
+$admin_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'admin'")->fetch_assoc()['count'];
+$customer_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'individual'")->fetch_assoc()['count'];
+$enterprise_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'enterprise'")->fetch_assoc()['count'];
+$total_count = $result->num_rows;
+?>
+ 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +47,9 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Top Bar -->
         <header class="topbar">
             <div class="topbar-left">
-                <h1>Dashboard Overview</h1>
+                <h1>User Management</h1>
             </div>
             <div class="topbar-right">
                 <button class="icon-btn">
@@ -30,7 +62,243 @@
             </div>
         </header>
 
-        
+        <div class="dashboard-content">
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon users">👥</span>
+                    </div>
+                    <div class="stat-value"><?php echo $result->num_rows; ?></div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon admin">🔑</span>
+                    </div>
+                    <div class="stat-value"><?php echo $admin_count; ?></div>
+                    <div class="stat-label">Administrators</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon individual">🛍️</span>
+                    </div>
+                    <div class="stat-value"><?php echo $customer_count; ?></div>
+                    <div class="stat-label">Individual Customers</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon enterprise">🏢</span>
+                    </div>
+                    <div class="stat-value"><?php echo $enterprise_count; ?></div>
+                    <div class="stat-label">Enterprise Users</div>
+                </div>
+            </div>
+
+            <div class="section-separator"></div>
+
+            <!-- User Management Section -->
+            <div class="subsection-container-2">
+
+                <!-- User Management Table -->
+                <div class="user-management-section">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h2>All Users</h2>
+                        </div>
+                        <div class="user-management-header-actions">
+                            <input type="text" class="search-bar" placeholder="Search by username or email" id="userSearchBar">
+                            <!-- Role filter function -->
+                            <?php
+                            $roles = $conn->query("SELECT RoleName FROM roles ORDER BY RID ASC");
+                            echo '<select class="filter-select" id="roleFilter">';
+                            echo '<option value="all">All Roles</option>';
+                            while ($r = $roles->fetch_assoc()) {
+                                $roleName = htmlspecialchars($r['RoleName']);
+                                echo "<option value='{$roleName}'>{$roleName}</option>";
+                            }
+                            echo '</select>';
+                            ?>
+
+                            <!-- Status badge filter function -->
+                            <?php
+                            $statusOptions = $conn->query("SELECT status_name FROM user_stat ORDER BY USID ASC");
+                            echo '<select class="filter-select" id="statusFilter">';
+                            echo '<option value="all">All Status</option>';
+                            while ($status = $statusOptions->fetch_assoc()) {
+                                echo '<option value="'.htmlspecialchars($status['status_name']).'">'.ucfirst(htmlspecialchars($status['status_name'])).'</option>';
+                            }
+                            echo '</select>';
+                            ?>
+
+                            <button class="btn-add" onclick="location.href='add_user.php'">
+                                <span>+</span>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%;">User ID</th>
+                                    <th style="width:25%;">Username</th>
+                                    <th style="width:25%;">Email</th>
+                                    <th style="width:15%;">Role</th>
+                                    <th style="width:15%;">Status</th>
+                                    <th style="width:10%;">Actions</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <?php
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo "<tr data-role='" . htmlspecialchars($row['role']) . "' data-status='" . htmlspecialchars($row['status']) . "'>";
+                                        echo "<td><strong>#" . htmlspecialchars($row['UID']) . "</strong></td>";
+                                        echo "<td>";
+                                        echo "<span>" . htmlspecialchars($row['username']) . "</span>";
+
+                                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                                        
+                                        // Role badge
+                                        $known_roles = ['admin', 'individual', 'enterprise'];
+
+                                        $role_name = strtolower(str_replace(' ', '-', $row['role']));
+                                        $role_class = in_array($role_name, $known_roles) ? $role_name : 'other';
+
+                                        echo "<td><span class='role-badge " . $role_class . "'>" . htmlspecialchars($row['role']) . "</span></td>";
+                                        
+                                        // Status badge
+                                        $status = strtolower($row['status']); // ensure lowercase
+                                        switch($status) {
+                                            case 'active':
+                                                $status_class = 'normal'; // green
+                                                break;
+
+                                            case 'inactive':
+                                            case 'locked':
+                                            case 'suspended':
+                                                $status_class = 'critical'; // red
+                                                break;
+
+                                            case 'pending_activation':
+                                            case 'password_expired':
+                                                $status_class = 'warning'; // yellow
+                                                break;
+
+                                            default:
+                                                $status_class = 'other'; // gray
+                                                break;
+                                        }
+                                        echo "<td><span class='user-status-badge " . $status_class . "'>" . htmlspecialchars(ucfirst($row['status'])) . "</span></td>";
+                                        
+                                        echo "<td class='action-btn-cell'>
+                                                <button class='user-view-btn' onclick='viewUser(" . $row['UID'] . ")'>View</button>
+                                                <button class='edit-btn' onclick='editUser(" . $row['UID'] . ")'>Edit</button>
+                                                <button class='delete-btn' onclick='deleteUser(" . $row['UID'] . ")'>Delete</button>
+                                            </td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='9' class='no-data'>No users found</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-header">
+                        <span class="info-icon">ℹ️</span>
+                        <h3>Status tips</h3>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Green</span>
+                            <span class="detail-value">Accounts with a green status needs no actions and is running as expected</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Yellow</span>
+                            <span class="detail-value">Accounts with a yellow status require actions form an admin or user</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Red</span>
+                            <span class="detail-value">Accounts with a red status are critical and needs attention</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">White</span>
+                            <span class="detail-value">Accounts with a white status are accounts that have extra statuses that may need attention</span>
+                        </div>
+                    </div>
+                    <div class="warning-box">
+                        <div class="warning-header">
+                            <span>⚠️</span>
+                            <span>Warning</span>
+                        </div>
+                        <p>Seek a local administrator's approval before finalizing the change of an account's status</p>
+                    </div>
+                </div>
+            </div>
+            
+
+        </div>
     </main>
+
+    <script>
+        const searchBar = document.getElementById('userSearchBar');
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const tbody = document.getElementById('userTableBody');
+
+        function filterTable() {
+            const searchTerm = searchBar.value.toLowerCase();
+            const selectedRole = roleFilter.value;
+            const selectedStatus = statusFilter.value;
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                if (row.classList.contains('no-data')) continue;
+
+                const username = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                const role = row.getAttribute('data-role');
+                const status = row.getAttribute('data-status');
+
+                const matchesSearch = username.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = selectedRole === 'all' || role === selectedRole;
+                const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
+
+                if (matchesSearch && matchesRole && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+
+        searchBar.addEventListener('input', filterTable);
+        roleFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+
+        function viewUser(userId) {
+            window.location.href = 'view_user.php?UID=' + userId;
+        }
+
+        function editUser(userId) {
+            window.location.href = 'edit_user.php?UID=' + userId;
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                window.location.href = 'delete_user.php?UID=' + userId;
+            }
+        }
+    </script>
 </body>
 </html>
