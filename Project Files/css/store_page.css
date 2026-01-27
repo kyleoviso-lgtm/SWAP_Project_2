@@ -152,6 +152,7 @@ body {
     border-radius: 6px;
     padding: 0 16px;
     gap: 12px;
+    border: none;
 }
 
 .search-icon {
@@ -297,6 +298,17 @@ body {
 .price-input:focus {
     outline: none;
     border-color: #5865f2;
+}
+
+/* Remove spinner arrows from number inputs */
+.price-input::-webkit-inner-spin-button,
+.price-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-input {
+    -moz-appearance: textfield;
 }
 
 .products-section {

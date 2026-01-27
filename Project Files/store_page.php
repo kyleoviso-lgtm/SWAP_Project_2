@@ -1,3 +1,25 @@
+<?php
+$connection = new mysqli('localhost', 'root', '', 'mydb');
+
+if ($connection->connect_error) {
+    die('Database connection failed: ' . $connection->connect_error);
+}
+
+$minPrice = filter_input(INPUT_GET, 'min_price', FILTER_VALIDATE_FLOAT);
+$maxPrice = filter_input(INPUT_GET, 'max_price', FILTER_VALIDATE_FLOAT);
+$inStock = isset($_GET['in_stock']);
+$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+$sql = 'SELECT name, price, description, IID, availability FROM item ORDER BY name ASC';
+
+$stmt = $connection->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
+$items = $result->fetch_all(MYSQLI_ASSOC);
+
+$stmt->close();
+$connection->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,52 +29,13 @@
     <link rel="stylesheet" href="css/store_page.css">
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="#5865f2"/>
-                </svg>
-                <span>MFG Store</span>
-            </div>
-        </div>
-
-        <nav class="sidebar-nav">
-            <a href="#" class="nav-item active">
-                <span class="icon">🏪</span>
-                <span>Store</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">🛒</span>
-                <span>Cart</span>
-                <span class="badge">3</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">📦</span>
-                <span>Orders</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">⚙️</span>
-                <span>Settings</span>
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="avatar">JD</div>
-                <div class="user-info">
-                    <div class="user-name">John Doe</div>
-                    <div class="user-role">Buyer</div>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <?php include __DIR__ . '/sidebar.php'; ?>
 
     <main class="main-content">
         <header class="topbar">
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Search products, categories, or suppliers...">
+                <input type="text" id="search-input" placeholder="Search products, categories, or suppliers...">
             </div>
             <div class="topbar-right">
                 <button class="icon-btn">
@@ -69,245 +52,127 @@
             <div class="filters-section">
                 <div class="section-header">
                     <h2>Filters</h2>
-                    <button class="text-btn">Clear All</button>
+                    <a class="text-btn" id="clear-filters-btn">Clear All</a>
                 </div>
 
-                <div class="filter-group">
-                    <h3 class="filter-title">Categories</h3>
-                    <label class="checkbox-label">
-                        <input type="checkbox" checked>
-                        <span>Industrial Equipment</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>Power Tools</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>Safety Gear</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>Raw Materials</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>Machinery Parts</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
-                    <h3 class="filter-title">Price Range</h3>
-                    <div class="price-inputs">
-                        <input type="number" placeholder="Min" class="price-input">
-                        <span>—</span>
-                        <input type="number" placeholder="Max" class="price-input">
+                <div id="filters-form">
+                    <div class="filter-group">
+                        <h3 class="filter-title">Availability</h3>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="in-stock-filter">
+                            <span>In Stock</span>
+                        </label>
                     </div>
-                </div>
 
-                <div class="filter-group">
-                    <h3 class="filter-title">Availability</h3>
-                    <label class="checkbox-label">
-                        <input type="checkbox" checked>
-                        <span>In Stock</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>Pre-Order</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
-                    <h3 class="filter-title">Rating</h3>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>⭐⭐⭐⭐⭐ 5 Stars</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>⭐⭐⭐⭐ 4+ Stars</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox">
-                        <span>⭐⭐⭐ 3+ Stars</span>
-                    </label>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Price Range</h3>
+                        <div class="price-inputs">
+                            <input type="number" step="0.01" min="0" id="min-price-filter" placeholder="Min" class="price-input">
+                            <span>—</span>
+                            <input type="number" step="0.01" min="0" id="max-price-filter" placeholder="Max" class="price-input">
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="products-section">
                 <div class="products-header">
                     <div class="results-info">
-                        <h2>Industrial Equipment</h2>
-                        <span class="results-count">127 products found</span>
-                    </div>
-                    <div class="sort-controls">
-                        <label>Sort by:</label>
-                        <select class="sort-select">
-                            <option>Best Match</option>
-                            <option>Price: Low to High</option>
-                            <option>Price: High to Low</option>
-                            <option>Newest First</option>
-                            <option>Top Rated</option>
-                        </select>
+                        <h2>All Products</h2>
+                        <span class="results-count"><span id="product-count"><?php echo count($items); ?></span> products found</span>
                     </div>
                 </div>
 
-                <div class="products-grid">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">🏭</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge in-stock">In Stock</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Industrial Equipment</div>
-                            <h3 class="product-name">Heavy-Duty CNC Milling Machine</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐⭐</span>
-                                <span class="rating-count">(142)</span>
+                <div class="products-grid" id="products-grid">
+                    <?php if (!$items): ?>
+                        <div class="empty-state">No products match your filters.</div>
+                    <?php else: ?>
+                        <?php foreach ($items as $item): ?>
+                            <div class="product-card" data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>" data-description="<?php echo htmlspecialchars(strtolower($item['description'])); ?>" data-price="<?php echo htmlspecialchars((float)$item['price']); ?>" data-availability="<?php echo htmlspecialchars((int)$item['availability']); ?>">
+                                <div class="product-image">
+                                    <div class="image-placeholder">🏭</div>
+                                    <button class="wishlist-btn">❤️</button>
+                                    <?php if ((int)$item['availability'] === 1): ?>
+                                        <span class="stock-badge in-stock">In Stock</span>
+                                    <?php else: ?>
+                                        <span class="stock-badge out-of-stock">Out of Stock</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category">IID: <?php echo htmlspecialchars((string)$item['IID']); ?></div>
+                                    <h3 class="product-name"><?php echo htmlspecialchars($item['name']); ?></h3>
+                                    <div class="product-specs">
+                                        <span><?php echo htmlspecialchars($item['description']); ?></span>
+                                    </div>
+                                    <div class="product-footer">
+                                        <div class="product-price">$<?php echo number_format((float)$item['price'], 2); ?></div>
+                                        <button class="btn-add-cart">Add to Cart</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="product-specs">
-                                <span>• 5-Axis Control</span>
-                                <span>• 3000 RPM</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$24,999</div>
-                                <button class="btn-add-cart">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">⚙️</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge in-stock">In Stock</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Industrial Equipment</div>
-                            <h3 class="product-name">Hydraulic Press 200 Ton</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐</span>
-                                <span class="rating-count">(89)</span>
-                            </div>
-                            <div class="product-specs">
-                                <span>• 200 Ton Capacity</span>
-                                <span>• Electric Control</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$18,500</div>
-                                <button class="btn-add-cart">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">🔧</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge low-stock">Low Stock</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Power Tools</div>
-                            <h3 class="product-name">Industrial Welding Station</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐⭐</span>
-                                <span class="rating-count">(203)</span>
-                            </div>
-                            <div class="product-specs">
-                                <span>• MIG/TIG/Stick</span>
-                                <span>• 400A Output</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$3,299</div>
-                                <button class="btn-add-cart">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">🛠️</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge in-stock">In Stock</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Industrial Equipment</div>
-                            <h3 class="product-name">Laser Cutting System Pro</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐⭐</span>
-                                <span class="rating-count">(156)</span>
-                            </div>
-                            <div class="product-specs">
-                                <span>• 6kW Fiber Laser</span>
-                                <span>• Auto Focus</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$45,000</div>
-                                <button class="btn-add-cart">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">⚡</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge in-stock">In Stock</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Power Tools</div>
-                            <h3 class="product-name">Industrial Air Compressor</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐</span>
-                                <span class="rating-count">(78)</span>
-                            </div>
-                            <div class="product-specs">
-                                <span>• 200L Tank</span>
-                                <span>• 15 HP Motor</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$2,850</div>
-                                <button class="btn-add-cart">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="image-placeholder">🔩</div>
-                            <button class="wishlist-btn">❤️</button>
-                            <span class="stock-badge pre-order">Pre-Order</span>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">Machinery Parts</div>
-                            <h3 class="product-name">Precision Bearing Set Pro</h3>
-                            <div class="product-rating">
-                                <span class="stars">⭐⭐⭐⭐⭐</span>
-                                <span class="rating-count">(234)</span>
-                            </div>
-                            <div class="product-specs">
-                                <span>• High Carbon Steel</span>
-                                <span>• 500 Pieces</span>
-                            </div>
-                            <div class="product-footer">
-                                <div class="product-price">$599</div>
-                                <button class="btn-add-cart">Pre-Order</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pagination">
-                    <button class="page-btn">Previous</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">4</button>
-                    <button class="page-btn">Next</button>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const minPriceInput = document.getElementById('min-price-filter');
+        const maxPriceInput = document.getElementById('max-price-filter');
+        const inStockCheckbox = document.getElementById('in-stock-filter');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        const productCards = document.querySelectorAll('.product-card');
+        const productCount = document.getElementById('product-count');
+
+        function filterProducts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const minPrice = parseFloat(minPriceInput.value) || 0;
+            const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+            const filterInStock = inStockCheckbox.checked;
+
+            let visibleCount = 0;
+
+            productCards.forEach(card => {
+                const name = card.dataset.name;
+                const description = card.dataset.description;
+                const price = parseFloat(card.dataset.price);
+                const availability = parseInt(card.dataset.availability);
+
+                const matchesSearch = name.includes(searchTerm) || description.includes(searchTerm);
+                const matchesPrice = price >= minPrice && price <= maxPrice;
+                const matchesStock = !filterInStock || availability === 1;
+
+                const isVisible = matchesSearch && matchesPrice && matchesStock;
+
+                if (isVisible) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            productCount.textContent = visibleCount;
+        }
+
+        function clearFilters() {
+            searchInput.value = '';
+            minPriceInput.value = '';
+            maxPriceInput.value = '';
+            inStockCheckbox.checked = false;
+            filterProducts();
+        }
+
+        searchInput.addEventListener('input', filterProducts);
+        minPriceInput.addEventListener('input', filterProducts);
+        maxPriceInput.addEventListener('input', filterProducts);
+        inStockCheckbox.addEventListener('change', filterProducts);
+        clearFiltersBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            clearFilters();
+        });
+    </script>
 </body>
 </html>
