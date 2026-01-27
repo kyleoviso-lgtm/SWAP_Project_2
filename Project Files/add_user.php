@@ -19,6 +19,12 @@ $roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RID ASC");
 
 // Fetch statuses for dropdown
 $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID ASC");
+
+// Fetch payments for dropdown (optional)
+$payments = $conn->query("SELECT PID, token FROM payment ORDER BY PID ASC");
+
+// Fetch addresses for dropdown (optional)
+$addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as address_display FROM address ORDER BY AID ASC");
 ?>
 
 <head>
@@ -47,10 +53,10 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
             </div>
         </header>
         <div class="back-btn-container">
-                <button class="back-btn" onclick="window.location.href='dashboard_users.php'">
-                    ← Back
-                </button>
-            </div>
+            <button class="back-btn" onclick="window.location.href='dashboard_users.php'">
+                ← Back
+            </button>
+        </div>
 
         <div class="add-user-form-content">
             <div class="form-container">
@@ -71,9 +77,10 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                                     id="username" 
                                     name="username" 
                                     placeholder="Enter username"
+                                    maxlength="45"
                                     required
                                 >
-                                <span class="helper-text">Username must be unique</span>
+                                <span class="helper-text">Username must be unique (max 45 characters)</span>
                             </div>
 
                             <div class="form-group">
@@ -83,6 +90,7 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                                     id="email" 
                                     name="email" 
                                     placeholder="user@example.com"
+                                    maxlength="100"
                                     required
                                 >
                             </div>
@@ -124,7 +132,7 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                                     <?php
                                     if ($roles->num_rows > 0) {
                                         while ($role = $roles->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($role['RID']) . "'>" . htmlspecialchars($role['RoleName']) . "</option>";
+                                            echo "<option value='" . htmlspecialchars($role['RID']) . "'>" . htmlspecialchars(ucfirst($role['RoleName'])) . "</option>";
                                         }
                                     }
                                     ?>
@@ -138,7 +146,7 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                                     <?php
                                     if ($statuses->num_rows > 0) {
                                         while ($status = $statuses->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($status['USID']) . "'>" . htmlspecialchars(ucfirst($status['status_name'])) . "</option>";
+                                            echo "<option value='" . htmlspecialchars($status['USID']) . "'>" . htmlspecialchars(ucfirst(str_replace('_', ' ', $status['status_name']))) . "</option>";
                                         }
                                     }
                                     ?>
@@ -148,73 +156,47 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
 
                         <div class="section-separator-minor"></div>
 
-                        <!-- Optional Information -->
+                        <!-- Optional Foreign Key References -->
                         <div class="form-section-header">
-                            <h3>Additional Information</h3>
+                            <h3>Optional References</h3>
                             <span class="optional-label">(Optional)</span>
                         </div>
 
-                        <!-- First Name and Last Name Row -->
+                        <!-- Payment and Address Row -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="first_name">First Name</label>
-                                <input 
-                                    type="text" 
-                                    id="first_name" 
-                                    name="first_name" 
-                                    placeholder="Enter first name"
-                                >
+                                <label for="payment_ID">Payment Method</label>
+                                <select id="payment_ID" name="payment_ID">
+                                    <option value="">None</option>
+                                    <?php
+                                    if ($payments->num_rows > 0) {
+                                        while ($payment = $payments->fetch_assoc()) {
+                                            echo "<option value='" . htmlspecialchars($payment['PID']) . "'>Payment #" . htmlspecialchars($payment['PID']) . " (Token: " . htmlspecialchars($payment['token']) . ")</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <span class="helper-text">Link to existing payment method</span>
                             </div>
 
                             <div class="form-group">
-                                <label for="last_name">Last Name</label>
-                                <input 
-                                    type="text" 
-                                    id="last_name" 
-                                    name="last_name" 
-                                    placeholder="Enter last name"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Phone Number Row -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input 
-                                    type="tel" 
-                                    id="phone" 
-                                    name="phone" 
-                                    placeholder="+65 1234 5678"
-                                >
-                            </div>
-
-                            <div class="form-group">
-                                <label for="date_of_birth">Date of Birth</label>
-                                <input 
-                                    type="date" 
-                                    id="date_of_birth" 
-                                    name="date_of_birth"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="form-row">
-                            <div class="form-group full-width">
-                                <label for="notes">Admin Notes</label>
-                                <textarea 
-                                    id="notes" 
-                                    name="notes" 
-                                    rows="4"
-                                    placeholder="Add any internal notes about this user account"
-                                ></textarea>
-                                <span class="helper-text">These notes are only visible to administrators</span>
+                                <label for="address_ID">Address</label>
+                                <select id="address_ID" name="address_ID">
+                                    <option value="">None</option>
+                                    <?php
+                                    if ($addresses->num_rows > 0) {
+                                        while ($address = $addresses->fetch_assoc()) {
+                                            echo "<option value='" . htmlspecialchars($address['AID']) . "'>" . htmlspecialchars($address['address_display']) . "</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <span class="helper-text">Link to existing address</span>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" class="btn-cancel" onclick="window.location.href='user_management.php'">
+                            <button type="button" class="btn-cancel" onclick="window.location.href='dashboard_users.php'">
                                 Cancel
                             </button>
                             <button type="submit" class="btn-submit">
@@ -231,11 +213,11 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                         <h3>User Creation Tips</h3>
                     </div>
                     <ul class="info-list">
-                        <li>Choose a descriptive username that's easy to remember</li>
-                        <li>Use a strong password with mixed characters</li>
-                        <li>Assign the appropriate role based on user permissions</li>
-                        <li>Set account status to "Active" for immediate access</li>
-                        <li>Double-check email address for account notifications</li>
+                        <li>Username must be unique in the system</li>
+                        <li>Password will be securely hashed before storage</li>
+                        <li>User ID (UID) will be auto-generated as UUID</li>
+                        <li>Payment and Address are optional references</li>
+                        <li>Set status to "Active" for immediate access</li>
                     </ul>
 
                     <div class="section-separator-minor"></div>
@@ -253,6 +235,33 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
                         </div>
                         <div class="role-desc">
                             <strong>Enterprise:</strong> Business customer with bulk ordering
+                        </div>
+                    </div>
+
+                    <div class="section-separator-minor"></div>
+
+                    <div class="info-header">
+                        <span class="info-icon">📋</span>
+                        <h3>Account Statuses</h3>
+                    </div>
+                    <div class="role-descriptions">
+                        <div class="role-desc">
+                            <strong>Active:</strong> User can access the system normally
+                        </div>
+                        <div class="role-desc">
+                            <strong>Inactive:</strong> Account is disabled
+                        </div>
+                        <div class="role-desc">
+                            <strong>Pending Activation:</strong> Awaiting email confirmation
+                        </div>
+                        <div class="role-desc">
+                            <strong>Locked:</strong> Account locked due to security
+                        </div>
+                        <div class="role-desc">
+                            <strong>Suspended:</strong> Temporarily suspended
+                        </div>
+                        <div class="role-desc">
+                            <strong>Password Expired:</strong> Requires password reset
                         </div>
                     </div>
 
@@ -300,4 +309,3 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
     </script>
 </body>
 </html>
-
