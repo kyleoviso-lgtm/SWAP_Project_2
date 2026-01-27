@@ -23,10 +23,6 @@
                 <span>Store</span>
             </a>
             <a href="#" class="nav-item">
-                <span class="icon">📊</span>
-                <span>Dashboard</span>
-            </a>
-            <a href="#" class="nav-item">
                 <span class="icon">🛒</span>
                 <span>Cart</span>
                 <span class="badge">3</span>
