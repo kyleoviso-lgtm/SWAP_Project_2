@@ -936,7 +936,7 @@ body {
     border-radius: 20px;
     margin: 0px 2px;
     padding: 24px;
-    height: fit-content;
+    height: 100%;
 }
 
 .info-header {
