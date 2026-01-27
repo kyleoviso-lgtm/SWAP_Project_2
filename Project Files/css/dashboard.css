@@ -805,7 +805,8 @@ body {
 /* User Management Page specific classes*/
 
 .role-badge {
-    width: 40%;
+    min-width: 100px;
+    max-width: 120px;
 
     display: flex;
     flex-direction: row;
@@ -840,19 +841,6 @@ body {
 
 .user-management-section {
     width: 100%;
-}
-
-.user-status-info-section {
-    width: 250px;
-    height: 400px;
-
-    margin: 10px 10px;
-
-    background-color: rgb(55,55,60);
-    border: dashed #282c30;
-    border-radius: 20px;
-
-    color: #dcddde;
 }
 
 .user-management-header-actions {
@@ -939,6 +927,7 @@ body {
     background-color: #2c2f33;
     border: 1.5px dashed #202225;
     border-radius: 20px;
+    margin: 10px 2px;
     padding: 24px;
     height: fit-content;
 }
