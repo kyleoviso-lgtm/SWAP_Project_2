@@ -8,53 +8,7 @@
 </head>
 <body>
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="#5865f2"/>
-                </svg>
-                <span>Store Dashboard</span>
-            </div>
-        </div>
-
-        <nav class="sidebar-nav">
-            <a href="dashboard.php" class="nav-item active">
-                <span class="icon">📊</span>
-                <span>Overview</span>
-            </a>
-            <a href="dashboard_product_management.php" class="nav-item">
-                <span class="icon">📦</span>
-                <span>Product Management</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">🛒</span>
-                <span>Orders</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">👥</span>
-                <span>Customers</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">💰</span>
-                <span>Revenue</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">⚙️</span>
-                <span>Settings</span>
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="avatar">JD</div>
-                <div class="user-info">
-                    <div class="user-name">John Doe</div>
-                    <div class="user-role">Admin</div>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <?php include 'sidebar.php'; ?>
 
     <!-- Main Content -->
     <main class="main-content">
