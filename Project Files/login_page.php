@@ -24,7 +24,7 @@
                     </div>
                     <div class="feature-item">
                         <span class="check-icon">✓</span>
-                        <span>Save your favorites</span>
+                        <span>Purchase manufacturing orders</span>
                     </div>
                     <div class="feature-item">
                         <span class="check-icon">✓</span>
@@ -41,7 +41,7 @@
                     <p>Enter your credentials to continue</p>
                 </div>
 
-                <form class="login-form">
+                <form class="login-form" action="process_files/process_login.php" method="POST">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input 

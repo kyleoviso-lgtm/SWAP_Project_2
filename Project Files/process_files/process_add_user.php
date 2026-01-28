@@ -2,6 +2,12 @@
 // process_add_user.php
 
 // --------------------
+// GLOBAL PARENT DIRECTORY
+// --------------------
+// Go up two levels from this script (process_files) to Project Files
+$PARENT_DIR = dirname(dirname($_SERVER['PHP_SELF']));
+
+// --------------------
 // 1. Database connection
 // --------------------
 $servername = "localhost";
@@ -18,7 +24,7 @@ if ($conn->connect_error) {
 // 2. Handle only POST requests
 // --------------------
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: index.php?status=error_invalid_request");
+    header("Location: {$PARENT_DIR}/index.php?status=error_invalid_request");
     exit();
 }
 
@@ -26,13 +32,23 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 // 3. Identify source safely
 // --------------------
 // This controls where the user came from (admin panel, signup page, etc.)
-// and defines safe redirect destinations.
 $source = $_POST['source'] ?? 'signup'; // default public signup
+
+// Map source to file names
 $redirects = [
     'admin' => 'dashboard_users.php',
     'signup' => 'login.php',
 ];
-$return_url = $redirects[$source] ?? 'index.php';
+
+// Base redirect file for this request
+$redirect_file = $redirects[$source] ?? 'index.php';
+
+// Helper function to redirect anywhere in parent folder
+function redirect($file, $status) {
+    global $PARENT_DIR;
+    header("Location: {$PARENT_DIR}/{$file}?status={$status}");
+    exit();
+}
 
 // --------------------
 // 4. Collect and validate inputs
@@ -43,18 +59,15 @@ $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-    header("Location: {$return_url}?status=error_missing_fields");
-    exit();
+    redirect($redirect_file, "error_missing_fields");
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header("Location: {$return_url}?status=error_invalid_email");
-    exit();
+    redirect($redirect_file, "error_invalid_email");
 }
 
 if ($password !== $confirm_password) {
-    header("Location: {$return_url}?status=error_password_mismatch");
-    exit();
+    redirect($redirect_file, "error_password_mismatch");
 }
 
 // --------------------
@@ -68,8 +81,7 @@ $check_stmt->fetch();
 $check_stmt->close();
 
 if ($exists > 0) {
-    header("Location: {$return_url}?status=error_duplicate_user");
-    exit();
+    redirect($redirect_file, "error_duplicate_user");
 }
 
 // --------------------
@@ -78,8 +90,7 @@ if ($exists > 0) {
 $result = $conn->query("SELECT UUID() AS uuid");
 $uid = $result->fetch_assoc()['uuid'] ?? null;
 if (!$uid) {
-    header("Location: {$return_url}?status=error_uuid_failed");
-    exit();
+    redirect($redirect_file, "error_uuid_failed");
 }
 
 // --------------------
@@ -98,7 +109,7 @@ if ($source === 'admin') {
     $address_ID = null;
 }
 
-// Validate IDs are numeric (defense-in-depth)
+// Validate IDs are numeric
 foreach (['role_ID', 'status_ID', 'payment_ID', 'address_ID'] as $var) {
     if (isset($$var) && !is_null($$var) && !ctype_digit((string) $$var)) {
         $$var = null; // Reset invalid input
@@ -134,17 +145,13 @@ $stmt->bind_param(
 // 10. Execute and redirect
 // --------------------
 if ($stmt->execute()) {
-    // SUCCESS: redirect to the right place with banner support
     if ($source === 'admin') {
-        header("Location: dashboard_users.php?status=success_add");
+        redirect("dashboard_users.php", "success_add");
     } else {
-        header("Location: login.php?status=success_signup");
+        redirect("login.php", "success_signup");
     }
-    exit();
 } else {
-    // ERROR: redirect back with a database error banner
-    header("Location: {$return_url}?status=error_db");
-    exit();
+    redirect($redirect_file, "error_db");
 }
 
 $stmt->close();

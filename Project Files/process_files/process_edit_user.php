@@ -1,50 +1,70 @@
 <?php
 // process_edit_user.php
 
+// --------------------
+// GLOBAL PARENT DIRECTORY
+// --------------------
+$PARENT_DIR = dirname(dirname($_SERVER['PHP_SELF']));
+
+// --------------------
 // Database connection
+// --------------------
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "mydb";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// --------------------
+// Helper function for redirect
+// --------------------
+function redirect($file, $params = []) {
+    global $PARENT_DIR;
+    $query = http_build_query($params);
+    $url = $PARENT_DIR . "/" . $file;
+    if ($query) {
+        $url .= "?" . $query;
+    }
+    header("Location: " . $url);
+    exit();
+}
+
+// --------------------
 // Get POST data safely
-$UID = isset($_POST['UID']) ? $_POST['UID'] : '';
+// --------------------
+$UID = $_POST['UID'] ?? '';
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-$role_ID = isset($_POST['role_ID']) ? $_POST['role_ID'] : null;
-$status_ID = isset($_POST['status_ID']) ? $_POST['status_ID'] : null;
-$payment_ID = isset($_POST['payment_ID']) && $_POST['payment_ID'] !== '' ? $_POST['payment_ID'] : null;
-$address_ID = isset($_POST['address_ID']) && $_POST['address_ID'] !== '' ? $_POST['address_ID'] : null;
-$password = isset($_POST['password']) ? $_POST['password'] : '';
-$confirm_password = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+$role_ID = $_POST['role_ID'] ?? null;
+$status_ID = $_POST['status_ID'] ?? null;
+$payment_ID = (isset($_POST['payment_ID']) && $_POST['payment_ID'] !== '') ? $_POST['payment_ID'] : null;
+$address_ID = (isset($_POST['address_ID']) && $_POST['address_ID'] !== '') ? $_POST['address_ID'] : null;
+$password = $_POST['password'] ?? '';
+$confirm_password = $_POST['confirm_password'] ?? '';
 
+// --------------------
 // Basic validations
+// --------------------
 if (!$UID || !$username || !$email || !$role_ID || !$status_ID) {
-    header("Location: edit_user.php?UID={$UID}&status=error_missing");
-    exit();
+    redirect("edit_user.php", ['UID' => $UID, 'status' => 'error_missing']);
 }
 
 if ($password && strlen($password) < 8) {
-    header("Location: edit_user.php?UID={$UID}&status=error_password_length");
-    exit();
+    redirect("edit_user.php", ['UID' => $UID, 'status' => 'error_password_length']);
 }
 
 if ($password && $password !== $confirm_password) {
-    header("Location: edit_user.php?UID={$UID}&status=error_password_mismatch");
-    exit();
+    redirect("edit_user.php", ['UID' => $UID, 'status' => 'error_password_mismatch']);
 }
 
-
+// --------------------
 // Start building SQL dynamically
+// --------------------
 $sql = "UPDATE user SET username = ?, email = ?, role_ID = ?, status_ID = ?";
-
-// Prepare array for bind_param
 $params = [$username, $email, $role_ID, $status_ID];
 $types = "ssii";
 
@@ -73,12 +93,14 @@ if ($address_ID !== null) {
     $sql .= ", address_ID = NULL";
 }
 
-// WHERE clause for UID
+// WHERE clause
 $sql .= " WHERE UID = ?";
 $types .= "s";
 $params[] = $UID;
 
+// --------------------
 // Prepare and execute
+// --------------------
 $stmt = $conn->prepare($sql);
 if ($stmt === false) {
     die("Prepare failed: " . $conn->error);
@@ -87,16 +109,18 @@ if ($stmt === false) {
 // Bind dynamically
 $stmt->bind_param($types, ...$params);
 
+// --------------------
+// Execute and redirect
+// --------------------
 if ($stmt->execute()) {
+    // Success redirect
     $stmt->close();
     $conn->close();
-    // Redirect back to dashboard with success banner
-    header("Location: dashboard_users.php?status=success_edit");
-    exit();
+    redirect("dashboard_users.php", ['status' => 'success_edit']);
 } else {
-    // On failure, redirect back with error message
-    header("Location: dashboard_users.php?status=error_db");
-    exit();
+    // Failure redirect
+    $stmt->close();
+    $conn->close();
+    redirect("dashboard_users.php", ['status' => 'error_db']);
 }
-
 ?>

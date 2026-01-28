@@ -42,12 +42,12 @@ if (!$stmt) {
 $stmt->bind_param("s", $UID);
 
 if ($stmt->execute()) {
-    // ✅ Success
-    header("Location: dashboard_users.php?status=success_delete");
+    $parent_dir = dirname(dirname($_SERVER['PHP_SELF']));
+    header("Location: " . $parent_dir . "/dashboard_users.php?status=success_delete");
     exit();
 } else {
-    // ❌ Failure
-    header("Location: dashboard_users.php?status=error_delete_failed");
+    $parent_dir = dirname(dirname($_SERVER['PHP_SELF']));
+    header("Location: " . $parent_dir . "/dashboard_users.php?status=error_delete_failed");
     exit();
 }
 

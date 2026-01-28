@@ -27,6 +27,7 @@ $connection->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manufacturing Products Store</title>
     <link rel="stylesheet" href="css/store_page.css?v=<?php echo filemtime(__DIR__ . '/css/store_page.css'); ?>">
+    <link rel="stylesheet" href="css/sidebar.css">
 </head>
 <body>
     <main class="main-content">
@@ -58,7 +59,7 @@ $connection->close();
                         <h3 class="filter-title">Availability</h3>
                         <label class="checkbox-label">
                             <input type="checkbox" id="in-stock-filter">
-                            <span>In Stock</span>
+                            <span>Available for manufacturing</span>
                         </label>
                     </div>
 
@@ -68,6 +69,20 @@ $connection->close();
                             <input type="number" step="0.01" min="0" id="min-price-filter" placeholder="Min" class="price-input">
                             <span>—</span>
                             <input type="number" step="0.01" min="0" id="max-price-filter" placeholder="Max" class="price-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-separator">
+
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="user-profile">
+                        <div class="avatar">JD</div>
+                        <div class="user-info">
+                            <div class="user-name">John Doe</div>
+                            <div class="user-role">Admin</div>
                         </div>
                     </div>
                 </div>
@@ -90,9 +105,9 @@ $connection->close();
                                 <div class="product-image">
                                     <div class="image-placeholder">🏭</div>
                                     <?php if ((int)$item['availability'] === 1): ?>
-                                        <span class="stock-badge in-stock">In Stock</span>
+                                        <span class="stock-badge in-stock">Available</span>
                                     <?php else: ?>
-                                        <span class="stock-badge out-of-stock">Out of Stock</span>
+                                        <span class="stock-badge out-of-stock">Unavailable</span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="product-info">

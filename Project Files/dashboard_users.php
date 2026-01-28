@@ -86,14 +86,16 @@ $total_count = $result->num_rows;
 
                 // --- Error Messages ---
                 case 'error_missing':
-                    $message = "⚠️ Missing or invalid user ID.";
+                    $message = "Missing or invalid user ID.";
                     break;
                 case 'error_db':
-                    $message = "❌ Database error. Please try again.";
+                    $message = "Database error. Please try again.";
                     break;
                 case 'error_permission':
-                    $message = "🚫 You don't have permission to perform this action.";
+                    $message = "You don't have permission to perform this action.";
                     break;
+                case 'error_duplicate_user':
+                    $message = "Duplicate user exists";
                 case 'error_unknown':
                 default:
                     $message = "⚠️ An unexpected error occurred.";
@@ -355,7 +357,7 @@ $total_count = $result->num_rows;
 
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
-                window.location.href = 'process_delete_user.php?UID=' + userId;
+                window.location.href = 'process_filesprocess_delete_user.php?UID=' + userId;
             }
         }
     </script>

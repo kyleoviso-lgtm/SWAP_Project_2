@@ -86,7 +86,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                         <p>Update the details below to modify this user account</p>
                     </div>
 
-                    <form method="POST" action="process_edit_user.php" class="add-user-form">
+                    <form method="POST" action="process_files/process_edit_user.php" class="add-user-form">
                         <input type="hidden" name="UID" value="<?php echo htmlspecialchars($user['UID']); ?>">
                         
                         <!-- Username and Email Row -->

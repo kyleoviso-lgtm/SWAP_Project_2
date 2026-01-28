@@ -216,6 +216,8 @@ body {
 }
 
 .filters-section {
+    display: flex;
+    flex-direction: column;
     width: 340px;
     background-color: #36393f;
     border-right: 1px solid #202225;

@@ -89,7 +89,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                         <p>Fill in the details below to create a new user account</p>
                     </div>
 
-                    <form method="POST" action="process_add_user.php" class="add-user-form">
+                    <form method="POST" action="process_files/process_add_user.php" class="add-user-form">
                         <input type="hidden" name="source" value="admin">
                         <input type="hidden" name="return_url" value="dashboard_users.php">
                         <!-- Username and Email Row -->

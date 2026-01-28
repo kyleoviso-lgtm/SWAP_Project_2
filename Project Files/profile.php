@@ -95,7 +95,7 @@ function statusClass($status) {
 <head>
     <meta charset="UTF-8">
     <title>User Profile</title>
-    <link rel="stylesheet" href="test.css">
+    <link rel="stylesheet" href="css/profile-styles.css">
 </head>
 <body>
 
@@ -181,6 +181,9 @@ function statusClass($status) {
                 </table>
             </div>
         </div>
+
+        <!-- Logout button -->
+         
 
     </div>
 </div>
