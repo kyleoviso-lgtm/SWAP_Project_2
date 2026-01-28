@@ -26,11 +26,9 @@ $connection->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manufacturing Products Store</title>
-    <link rel="stylesheet" href="css/store_page.css">
+    <link rel="stylesheet" href="css/store_page.css?v=<?php echo filemtime(__DIR__ . '/css/store_page.css'); ?>">
 </head>
 <body>
-    <?php include __DIR__ . '/sidebar.php'; ?>
-
     <main class="main-content">
         <header class="topbar">
             <div class="search-bar">
@@ -88,10 +86,9 @@ $connection->close();
                         <div class="empty-state">No products match your filters.</div>
                     <?php else: ?>
                         <?php foreach ($items as $item): ?>
-                            <div class="product-card" data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>" data-description="<?php echo htmlspecialchars(strtolower($item['description'])); ?>" data-price="<?php echo htmlspecialchars((float)$item['price']); ?>" data-availability="<?php echo htmlspecialchars((int)$item['availability']); ?>">
+                            <div class="product-card card-link" data-href="item_page.php?iid=<?php echo urlencode((string)$item['IID']); ?>" data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>" data-description="<?php echo htmlspecialchars(strtolower($item['description'])); ?>" data-price="<?php echo htmlspecialchars((float)$item['price']); ?>" data-availability="<?php echo htmlspecialchars((int)$item['availability']); ?>">
                                 <div class="product-image">
                                     <div class="image-placeholder">🏭</div>
-                                    <button class="wishlist-btn">❤️</button>
                                     <?php if ((int)$item['availability'] === 1): ?>
                                         <span class="stock-badge in-stock">In Stock</span>
                                     <?php else: ?>
@@ -106,7 +103,6 @@ $connection->close();
                                     </div>
                                     <div class="product-footer">
                                         <div class="product-price">$<?php echo number_format((float)$item['price'], 2); ?></div>
-                                        <button class="btn-add-cart">Add to Cart</button>
                                     </div>
                                 </div>
                             </div>
@@ -124,6 +120,7 @@ $connection->close();
         const inStockCheckbox = document.getElementById('in-stock-filter');
         const clearFiltersBtn = document.getElementById('clear-filters-btn');
         const productCards = document.querySelectorAll('.product-card');
+        const clickableCards = document.querySelectorAll('.card-link');
         const productCount = document.getElementById('product-count');
 
         function filterProducts() {
@@ -172,6 +169,15 @@ $connection->close();
         clearFiltersBtn.addEventListener('click', (e) => {
             e.preventDefault();
             clearFilters();
+        });
+
+        clickableCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const href = card.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
         });
     </script>
 </body>

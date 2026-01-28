@@ -216,7 +216,7 @@ body {
 }
 
 .filters-section {
-    width: 280px;
+    width: 340px;
     background-color: #36393f;
     border-right: 1px solid #202225;
     padding: 24px;
@@ -282,17 +282,18 @@ body {
 .price-inputs {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .price-input {
     flex: 1;
-    padding: 8px 12px;
+    min-width: 0;
+    padding: 6px 8px;
     background-color: #2c2f33;
     border: 1px solid #202225;
     border-radius: 6px;
     color: #dcddde;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .price-input:focus {
@@ -371,6 +372,13 @@ body {
     border-radius: 8px;
     overflow: hidden;
     transition: all 0.3s;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-link {
+    cursor: pointer;
 }
 
 .product-card:hover {
@@ -426,14 +434,9 @@ body {
     color: #43b581;
 }
 
-.stock-badge.low-stock {
-    background-color: rgba(250, 166, 26, 0.2);
-    color: #faa61a;
-}
-
-.stock-badge.pre-order {
-    background-color: rgba(88, 101, 242, 0.2);
-    color: #5865f2;
+.stock-badge.out-of-stock {
+    background-color: rgba(237, 66, 69, 0.2);
+    color: #ed4245;
 }
 
 .product-info {
