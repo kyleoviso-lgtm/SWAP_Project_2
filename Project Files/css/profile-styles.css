@@ -43,6 +43,10 @@ body {
   min-height: 100vh;
 }
 
+a {
+  text-decoration: none;
+}
+
 /* ===========================
    SCROLLBAR
 =========================== */
@@ -263,4 +267,32 @@ body {
   padding: 40px 20px;
   color: var(--text-muted);
   font-size: 14px;
+}
+
+/* Logout button styles */
+
+.logout-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 10%;
+  border-radius: 10px;
+  
+  margin: 6px;
+  padding: 8px 10px;
+
+  background-color: #ed4245;
+  color: #dcddde;
+
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px) translateX(1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.logout-btn-text {
+  color: #dcddde;
 }

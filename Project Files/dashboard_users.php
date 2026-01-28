@@ -2,6 +2,8 @@
 <html lang="en">
 
 <?php
+session_start();
+
 // Database connection
 $servername = "localhost";
 $username = "root";
@@ -13,7 +15,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch users and their role names
+// Now you can run your table queries safely
 $sql = "SELECT 
             u.UID, 
             u.username, 

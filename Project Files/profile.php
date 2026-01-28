@@ -183,8 +183,11 @@ function statusClass($status) {
         </div>
 
         <!-- Logout button -->
-         
-
+        <a href="process_files/process_logout.php">
+            <div class="logout-btn">
+                <h3 class="logout-btn-text">logout</h3>
+            </div>
+        </a> 
     </div>
 </div>
 

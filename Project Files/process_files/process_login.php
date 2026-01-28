@@ -32,7 +32,7 @@ function redirect($file, $params = []) {
 // Only allow POST
 // --------------------
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    redirect("login.php", ['status' => 'error_invalid_request']);
+    redirect("login_page.php", ['status' => 'error_invalid_request']);
 }
 
 $email = trim($_POST['email'] ?? '');
@@ -42,7 +42,7 @@ $password = $_POST['password'] ?? '';
 // Basic validation
 // --------------------
 if (empty($email) || empty($password)) {
-    redirect("login.php", ['status' => 'error_missing_fields']);
+    redirect("login_page.php", ['status' => 'error_missing_fields']);
 }
 
 // --------------------
@@ -61,7 +61,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    redirect("login.php", ['status' => 'error_invalid_credentials']);
+    redirect("login_page.php", ['status' => 'error_invalid_credentials']);
 }
 
 $user = $result->fetch_assoc();
@@ -70,14 +70,14 @@ $user = $result->fetch_assoc();
 // Check password
 // --------------------
 if (!password_verify($password, $user['password_hash'])) {
-    redirect("login.php", ['status' => 'error_invalid_credentials']);
+    redirect("login_page.php", ['status' => 'error_invalid_credentials']);
 }
 
 // --------------------
 // Check if account is active
 // --------------------
 if (strtolower($user['status_name']) !== 'active') {
-    redirect("login.php", ['status' => 'error_account_inactive']);
+    redirect("login_page.php", ['status' => 'error_account_inactive']);
 }
 
 // --------------------
@@ -101,6 +101,6 @@ switch ($_SESSION['role']) {
         redirect("store_page.php", ['status' => 'success_login']);
         break;
     default:
-        redirect("login.php", ['status' => 'error_unknown_role']);
+        redirect("login_page.php", ['status' => 'error_unknown_role']);
 }
 ?>

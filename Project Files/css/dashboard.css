@@ -14,6 +14,10 @@ body {
     overflow: hidden;
 }
 
+a {
+    text-decoration: none;
+}
+
 /* Section Separators */
 .section-separator {
     width: 100%;
