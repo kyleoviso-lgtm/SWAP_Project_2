@@ -28,9 +28,27 @@ $sql = "SELECT
 $result = $conn->query($sql);
 
 // Count users by role
-$admin_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'admin'")->fetch_assoc()['count'];
-$customer_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'individual'")->fetch_assoc()['count'];
-$enterprise_count = $conn->query("SELECT COUNT(*) as count FROM user u INNER JOIN roles r ON u.role_ID = r.RID WHERE r.RoleName = 'enterprise'")->fetch_assoc()['count'];
+$admin_count = $conn->query("
+    SELECT COUNT(*) as count 
+    FROM user u 
+    INNER JOIN roles r ON u.role_ID = r.RID 
+    WHERE r.RoleName IN ('admin', 'staff')
+")->fetch_assoc()['count'];
+
+$customer_count = $conn->query("
+    SELECT COUNT(*) as count 
+    FROM user u 
+    INNER JOIN roles r ON u.role_ID = r.RID 
+    WHERE r.RoleName = 'individual'
+")->fetch_assoc()['count'];
+
+$enterprise_count = $conn->query("
+    SELECT COUNT(*) as count 
+    FROM user u 
+    INNER JOIN roles r ON u.role_ID = r.RID 
+    WHERE r.RoleName = 'enterprise'
+")->fetch_assoc()['count'];
+
 $total_count = $result->num_rows;
 ?>
  
@@ -47,6 +65,46 @@ $total_count = $result->num_rows;
 
     <!-- Main Content -->
     <main class="main-content">
+        
+        <?php if (isset($_GET['status'])): ?>
+            <?php
+            $status = $_GET['status'];
+            $bannerClass = str_starts_with($status, 'success') ? 'success-banner' : 'error-banner';
+            $message = '';
+
+            switch ($status) {
+                // --- Success Messages ---
+                case 'success_add':
+                    $message = "User added successfully.";
+                    break;
+                case 'success_edit':
+                    $message = "User updated successfully.";
+                    break;
+                case 'success_delete':
+                    $message = "User deleted successfully.";
+                    break;
+
+                // --- Error Messages ---
+                case 'error_missing':
+                    $message = "⚠️ Missing or invalid user ID.";
+                    break;
+                case 'error_db':
+                    $message = "❌ Database error. Please try again.";
+                    break;
+                case 'error_permission':
+                    $message = "🚫 You don't have permission to perform this action.";
+                    break;
+                case 'error_unknown':
+                default:
+                    $message = "⚠️ An unexpected error occurred.";
+                    break;
+            }
+            ?>
+            <div class="<?php echo $bannerClass; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
+        <?php endif; ?>
+
         <header class="topbar">
             <div class="topbar-left">
                 <h1>User Management</h1>
@@ -79,7 +137,7 @@ $total_count = $result->num_rows;
                         <span class="stat-icon admin">🔑</span>
                     </div>
                     <div class="stat-value"><?php echo $admin_count; ?></div>
-                    <div class="stat-label">Administrators</div>
+                    <div class="stat-label">Admin/Staff</div>
                 </div>
 
                 <div class="stat-card">
@@ -95,7 +153,7 @@ $total_count = $result->num_rows;
                         <span class="stat-icon enterprise">🏢</span>
                     </div>
                     <div class="stat-value"><?php echo $enterprise_count; ?></div>
-                    <div class="stat-label">Enterprise Users</div>
+                    <div class="stat-label">Enterprise Customers</div>
                 </div>
             </div>
 
@@ -159,56 +217,53 @@ $total_count = $result->num_rows;
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        echo "<tr data-role='" . htmlspecialchars($row['role']) . "' data-status='" . htmlspecialchars($row['status']) . "'>";
-                                        echo "<td><strong>#" . htmlspecialchars($row['UID']) . "</strong></td>";
-                                        echo "<td>";
-                                        echo "<span>" . htmlspecialchars($row['username']) . "</span>";
-
-                                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                                        
-                                        // Role badge
-                                        $known_roles = ['admin', 'individual', 'enterprise'];
-
+                                        // Prepare role and status classes
+                                        $known_roles = ['admin', 'staff', 'individual', 'enterprise'];
                                         $role_name = strtolower(str_replace(' ', '-', $row['role']));
                                         $role_class = in_array($role_name, $known_roles) ? $role_name : 'other';
 
-                                        echo "<td><span class='role-badge " . $role_class . "'>" . htmlspecialchars($row['role']) . "</span></td>";
-                                        
-                                        // Status badge
-                                        $status = strtolower($row['status']); // ensure lowercase
+                                        $status = strtolower($row['status']);
                                         switch($status) {
                                             case 'active':
-                                                $status_class = 'normal'; // green
+                                                $status_class = 'normal';
                                                 break;
-
                                             case 'inactive':
                                             case 'locked':
                                             case 'suspended':
-                                                $status_class = 'critical'; // red
+                                                $status_class = 'critical';
                                                 break;
-
                                             case 'pending_activation':
                                             case 'password_expired':
-                                                $status_class = 'warning'; // yellow
+                                                $status_class = 'warning';
                                                 break;
-
                                             default:
-                                                $status_class = 'other'; // gray
-                                                break;
+                                                $status_class = 'other';
                                         }
-                                        echo "<td><span class='user-status-badge " . $status_class . "'>" . htmlspecialchars(ucfirst($row['status'])) . "</span></td>";
-                                        
+
+                                        $uid_js = json_encode($row['UID']);
+                                        $role_html = htmlspecialchars($row['role']);
+                                        $status_html = htmlspecialchars(ucfirst($row['status']));
+
+                                        echo "<tr data-role='" . htmlspecialchars($row['role']) . "' data-status='" . htmlspecialchars($row['status']) . "'>";
+                                        echo "<td><strong>#" . htmlspecialchars($row['UID']) . "</strong></td>";
+                                        echo "<td><span>" . htmlspecialchars($row['username']) . "</span></td>";
+                                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                                        echo "<td><span class='role-badge {$role_class}'>{$role_html}</span></td>";
+                                        echo "<td><span class='user-status-badge {$status_class}'>{$status_html}</span></td>";
+
                                         echo "<td class='action-btn-cell'>
-                                                <button class='user-view-btn' onclick='viewUser(" . $row['UID'] . ")'>View</button>
-                                                <button class='edit-btn' onclick='editUser(" . $row['UID'] . ")'>Edit</button>
-                                                <button class='delete-btn' onclick='deleteUser(" . $row['UID'] . ")'>Delete</button>
+                                                <button class='user-view-btn' onclick='viewUser({$uid_js})'>View</button>
+                                                <button class='edit-btn' onclick='editUser({$uid_js})'>Edit</button>
+                                                <button class='delete-btn' onclick='deleteUser({$uid_js})'>Delete</button>
                                             </td>";
+
                                         echo "</tr>";
                                     }
                                 } else {
                                     echo "<tr><td colspan='9' class='no-data'>No users found</td></tr>";
                                 }
                                 ?>
+
                             </tbody>
                         </table>
                     </div>
@@ -234,6 +289,10 @@ $total_count = $result->num_rows;
                         <div class="detail-row">
                             <span class="detail-label">White</span>
                             <span class="detail-value">Accounts with a white status are accounts that have extra statuses that may need attention</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">More info</span>
+                            <span class="detail-value"><a href="https://howto.caspio.com/manage-users-and-groups/directory-users/user-status-overview/" target="_blank">Click here for more info about account statuses</a></span>
                         </div>
                     </div>
                     <div class="warning-box">
@@ -287,7 +346,7 @@ $total_count = $result->num_rows;
         statusFilter.addEventListener('change', filterTable);
 
         function viewUser(userId) {
-            window.location.href = 'view_user.php?UID=' + userId;
+            window.location.href = 'profile.php?UID=' + encodeURIComponent(userId);
         }
 
         function editUser(userId) {
@@ -296,7 +355,7 @@ $total_count = $result->num_rows;
 
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
-                window.location.href = 'delete_user.php?UID=' + userId;
+                window.location.href = 'process_delete_user.php?UID=' + userId;
             }
         }
     </script>

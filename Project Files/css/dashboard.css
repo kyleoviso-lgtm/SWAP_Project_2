@@ -264,6 +264,14 @@ body {
     background-color: rgba(254, 231, 92, 0.15);
 }
 
+.stat-icon.users {
+    background-color: rgba(182, 81, 182, 0.15);
+}
+
+.stat-icon.admin {
+    background-color: rgba(200, 200, 200, 0.15);
+}
+
 .stat-icon.individual {
     background-color: rgba(254, 231, 92, 0.15);
 }
@@ -824,6 +832,11 @@ body {
     color: #f2bf58;   
 }
 
+.role-badge.staff {
+    background-color: rgba(242, 234, 88, 0.15);
+    color: #f2bf58; 
+}
+
 .role-badge.individual {
     background-color: rgba(88, 242, 101, 0.15);
     color: #58f28e;
@@ -928,6 +941,21 @@ body {
     color: #ed4245;
 }
 
+/* Error status styles for user management page */
+.error-banner {
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+.success-banner {
+    background-color: #43b581;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
 /* Info card classes */
 
 .info-card {
@@ -979,6 +1007,10 @@ body {
     color: #dcddde;
     font-size: 14px;
     flex: 1;
+}
+
+.detail-value a {
+    color: #dcddde;
 }
 
 .status-badge {

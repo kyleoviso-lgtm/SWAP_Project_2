@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 // 2. Handle only POST requests
 // --------------------
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: index.php");
+    header("Location: index.php?status=error_invalid_request");
     exit();
 }
 
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 // and defines safe redirect destinations.
 $source = $_POST['source'] ?? 'signup'; // default public signup
 $redirects = [
-    'admin' => 'add_user.php',
+    'admin' => 'dashboard_users.php',
     'signup' => 'login.php',
 ];
 $return_url = $redirects[$source] ?? 'index.php';
@@ -43,17 +43,17 @@ $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-    header("Location: {$return_url}?error=missing_fields");
+    header("Location: {$return_url}?status=error_missing_fields");
     exit();
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header("Location: {$return_url}?error=invalid_email");
+    header("Location: {$return_url}?status=error_invalid_email");
     exit();
 }
 
 if ($password !== $confirm_password) {
-    header("Location: {$return_url}?error=password_mismatch");
+    header("Location: {$return_url}?status=error_password_mismatch");
     exit();
 }
 
@@ -68,7 +68,7 @@ $check_stmt->fetch();
 $check_stmt->close();
 
 if ($exists > 0) {
-    header("Location: {$return_url}?error=duplicate_user");
+    header("Location: {$return_url}?status=error_duplicate_user");
     exit();
 }
 
@@ -78,7 +78,7 @@ if ($exists > 0) {
 $result = $conn->query("SELECT UUID() AS uuid");
 $uid = $result->fetch_assoc()['uuid'] ?? null;
 if (!$uid) {
-    header("Location: {$return_url}?error=uuid_failed");
+    header("Location: {$return_url}?status=error_uuid_failed");
     exit();
 }
 
@@ -134,11 +134,17 @@ $stmt->bind_param(
 // 10. Execute and redirect
 // --------------------
 if ($stmt->execute()) {
-    header("Location: {$return_url}?success=1");
+    // SUCCESS: redirect to the right place with banner support
+    if ($source === 'admin') {
+        header("Location: dashboard_users.php?status=success_add");
+    } else {
+        header("Location: login.php?status=success_signup");
+    }
     exit();
 } else {
-    // In production, log the error instead of displaying it
-    echo "Database error: " . htmlspecialchars($stmt->error);
+    // ERROR: redirect back with a database error banner
+    header("Location: {$return_url}?status=error_db");
+    exit();
 }
 
 $stmt->close();
