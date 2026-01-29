@@ -246,6 +246,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    margin: 6px 0px;
 }
 
 .form-group {

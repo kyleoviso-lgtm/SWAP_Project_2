@@ -675,6 +675,11 @@ a {
     text-align: center;
 }
 
+/* Order management specific classes */
+.orders-section .section-header {
+    margin: 2px 14px;
+}
+
 /* Order Tracking Page Specific classes */
 
 .active-order-header-actions {
