@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2026 at 02:01 PM
+-- Generation Time: Jan 29, 2026 at 02:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -73,24 +73,25 @@ CREATE TABLE `item` (
   `name` varchar(45) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
-  `availability` tinyint(1) DEFAULT 1
+  `availability` tinyint(1) DEFAULT 1,
+  `role_id` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `item`
 --
 
-INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`) VALUES
-(2, 'Test PC 2', 100.42, 'PC from 2019 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 1),
-(3, 'TestPC 3', 901.45, 'Test PC 3', 0),
-(91, 'test PC 23', 803.21, 'testpc23', 1),
-(201, 'Test PC', 1023.24, 'This PC is so trash that even Om wouldn\'t use it as a bomb', 0),
-(893, 'Test PC 123', 1842.32, 'TestPC123', 1),
-(901, 'Test PC 345', 1024.94, 'Test PC 345', 0),
-(903, 'My own PC', 958.23, 'My personal PC', 0),
-(905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1),
-(906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1),
-(907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1);
+INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`, `role_id`) VALUES
+(2, 'Test PC 2', 100.42, 'PC from 2019 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 1, 1),
+(3, 'TestPC 3', 901.45, 'Test PC 3', 0, 1),
+(91, 'test PC 23', 803.21, 'testpc23', 1, 1),
+(201, 'Test PC', 1023.24, 'This PC is so trash that even Om wouldn\'t use it as a bomb', 0, 1),
+(893, 'Test PC 123', 1842.32, 'TestPC123', 1, 1),
+(901, 'Test PC 345', 1024.94, 'Test PC 345', 0, 1),
+(903, 'My own PC', 958.23, 'My personal PC', 0, 1),
+(905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1, 1),
+(906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1, 1),
+(907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -311,7 +312,8 @@ ALTER TABLE `colour`
 -- Indexes for table `item`
 --
 ALTER TABLE `item`
-  ADD PRIMARY KEY (`IID`);
+  ADD PRIMARY KEY (`IID`),
+  ADD KEY `fk_role_id` (`role_id`);
 
 --
 -- Indexes for table `item_audit_logging`
@@ -449,6 +451,12 @@ ALTER TABLE `user_stat`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `item`
+--
+ALTER TABLE `item`
+  ADD CONSTRAINT `fk_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`RID`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `item_audit_logging`

@@ -90,6 +90,17 @@ function statusClass($status) {
 <div class="main-content">
     <div class="dashboard-content">
 
+        <!-- Back button -->
+        <div class="back-btn-container">
+            <button
+                type="button"
+                class="btn-cancel back-btn"
+                onclick="window.history.back();"
+            >
+                ← Back
+            </button>
+        </div>
+    
         <!-- USER PROFILE -->
         <div class="subsection-container">
             <h3>User Profile</h3>
