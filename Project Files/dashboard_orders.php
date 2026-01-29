@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 // Fetch active orders (order_status_id != completed/cancelled, adjust based on your status IDs)
 $active_sql = "SELECT OID, user_id, order_status_id, item_id, colour_id, size_id, payment_id, 
@@ -42,6 +31,9 @@ function getOrderStatus($status_id) {
     }
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">

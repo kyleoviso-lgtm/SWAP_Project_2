@@ -1,20 +1,8 @@
 <?php
 session_start();
-
-/* =======================
-   DATABASE CONNECTION
-======================= */
-$conn = mysqli_connect("localhost", "root", "", "mydb");
-if (!$conn) {
-    die("Database connection failed");
-}
-
-/* =======================
-   AUTH CHECK
-======================= */
-if (!isset($_SESSION['user_id'])) {
-    die("User not logged in");
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 $userId = $_SESSION['user_id'];
 

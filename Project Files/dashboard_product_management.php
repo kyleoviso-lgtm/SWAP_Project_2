@@ -1,24 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb"; // your schema name
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 // Fetch data from item table
 $sql = "SELECT IID, name, price, description, availability FROM item";
 $result = $conn->query($sql);
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">

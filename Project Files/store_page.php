@@ -1,9 +1,8 @@
 <?php
-$connection = new mysqli('localhost', 'root', '', 'mydb');
-
-if ($connection->connect_error) {
-    die('Database connection failed: ' . $connection->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
+require_once 'user_info_fetcher.php';
 
 $minPrice = filter_input(INPUT_GET, 'min_price', FILTER_VALIDATE_FLOAT);
 $maxPrice = filter_input(INPUT_GET, 'max_price', FILTER_VALIDATE_FLOAT);
@@ -12,14 +11,16 @@ $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 $sql = 'SELECT name, price, description, IID, availability FROM item ORDER BY name ASC';
 
-$stmt = $connection->prepare($sql);
+$stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
 $items = $result->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
-$connection->close();
+$conn->close();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,13 +79,15 @@ $connection->close();
                 </div>
 
                 <div class="sidebar-footer">
-                    <div class="user-profile">
-                        <div class="avatar">JD</div>
-                        <div class="user-info">
-                            <div class="user-name">John Doe</div>
-                            <div class="user-role">Admin</div>
+                    <a href="profile.php">
+                        <div class="user-profile">
+                            <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
+                            <div class="user-info">
+                                <div class="user-name"><?= htmlspecialchars($userName) ?></div>
+                                <div class="user-role"><?= htmlspecialchars($userRole) ?></div>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 

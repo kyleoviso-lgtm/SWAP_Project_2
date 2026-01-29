@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 27, 2026 at 09:09 AM
+-- Generation Time: Jan 29, 2026 at 02:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -89,7 +89,8 @@ INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`) VALUE
 (901, 'Test PC 345', 1024.94, 'Test PC 345', 0),
 (903, 'My own PC', 958.23, 'My personal PC', 0),
 (905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1),
-(906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1);
+(906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1),
+(907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1);
 
 -- --------------------------------------------------------
 
@@ -193,8 +194,9 @@ CREATE TABLE `roles` (
 
 INSERT INTO `roles` (`RID`, `RoleName`) VALUES
 (1, 'admin'),
-(2, 'individual'),
-(3, 'enterprise');
+(2, 'staff'),
+(3, 'individual'),
+(4, 'enterprise');
 
 -- --------------------------------------------------------
 
@@ -240,10 +242,15 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`UID`, `username`, `role_ID`, `status_ID`, `payment_ID`, `address_ID`, `email`, `password_hash`) VALUES
 ('1', 'John SWAP Tester', 1, 1, 1, 1, 'john.tester@gmail.com', '1234561234'),
-('2', 'John Customer', 2, 1, 1, 1, 'yoooooo.yo@hotmail.com', 'qowr1u1313t'),
-('3', 'John Enterprise', 3, 1, 1, 1, 'Aw.shucks@hotmail.com', '9quegoqegjqeg'),
-('bdd0f262-fb55-11f0-90b0-a05950b924a8', 'testttt', 2, 3, NULL, NULL, 'johnny.test@gmail.com', '$2y$10$WIFXlJf3ZEuYisp1F3PGWObsQFCrgzdnc01QytSUfUOpMFnUEyHcu'),
-('dd2c7cdb-fb55-11f0-90b0-a05950b924a8', 'bleh', 2, 3, NULL, NULL, 'bleh.bleh@gmail.com', '$2y$10$Io1et5LtnSp/z9CGeWRas.bYxg1kBJWU.YoJozF6yQt1JiBsipd2.');
+('1bd706ac-fc8c-11f0-90b0-a05950b924a8', 'test user 3', 2, 6, 1, 1, 'test.user.3@gmail.com', '$2y$10$5/pxuoePhQniizGLwCLojOTX2hWBMEdjhO/3Vc.XUU0OZa/3RciXe'),
+('2', 'John Customer', 3, 1, 1, 1, 'yoooooo.yo@hotmail.com', 'qowr1u1313t'),
+('3', 'John Enterprise', 4, 1, 1, 1, 'Aw.shucks@hotmail.com', '9quegoqegjqeg'),
+('75281e3f-fc8b-11f0-90b0-a05950b924a8', 'staff dude', 1, 2, 1, 1, 'staff.dude@gmail.com', '$2y$10$ZG9QAFVffrGU0nRUHAADceM/OM1cjU534RbdENA1/4fkT7festm.K'),
+('899c0bfb-fbb9-11f0-90b0-a05950b924a8', '2404716I@student.tp.edu.sg', 4, 2, NULL, NULL, '2404716I@student.tp.edu.sg', '$2y$10$CTCoTphW49u.8l.TzmBdeeQu7TCtJ0tXS/F7w.LVtfxXIgMmy/PmO'),
+('a745f9d2-fc86-11f0-90b0-a05950b924a8', 'Ombruh', 2, 4, 1, 1, 'Om.bruh@gmail.com', '$2y$10$0Jd.Vpo6LwxMwr6Y4QJLVeJnDPBcXjY53NKfBERXnOCLBCZQYbFuW'),
+('ab957136-fc91-11f0-90b0-a05950b924a8', 'Login Tester', 1, 1, 1, 1, 'test.login@gmail.com', '$2y$10$iQcLLpwb7auf2jgcsYee7eckggXfI3NY57L7DWUHCDl2BPz..0Mjy'),
+('bdd0f262-fb55-11f0-90b0-a05950b924a8', 'testttt', 3, 3, NULL, NULL, 'johnny.test@gmail.com', '$2y$10$WIFXlJf3ZEuYisp1F3PGWObsQFCrgzdnc01QytSUfUOpMFnUEyHcu'),
+('dd2c7cdb-fb55-11f0-90b0-a05950b924a8', 'bleh', 3, 3, NULL, NULL, 'bleh.bleh@gmail.com', '$2y$10$ictBQTukL8rORmqsgD7oNO53vENXzs40SLG9z9vtdO0PB.A22/h0m');
 
 -- --------------------------------------------------------
 
@@ -389,7 +396,7 @@ ALTER TABLE `colour`
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `IID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=907;
+  MODIFY `IID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=908;
 
 --
 -- AUTO_INCREMENT for table `item_audit_logging`
@@ -419,7 +426,7 @@ ALTER TABLE `payment`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `RID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `RID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `size`
@@ -467,8 +474,8 @@ ALTER TABLE `order_table`
 --
 ALTER TABLE `user`
   ADD CONSTRAINT `fk_user_address` FOREIGN KEY (`address_ID`) REFERENCES `address` (`AID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_user_payment` FOREIGN KEY (`payment_ID`) REFERENCES `payment` (`PID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_user_role` FOREIGN KEY (`role_ID`) REFERENCES `roles` (`RID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_user_payment` FOREIGN KEY (`payment_ID`) REFERENCES `payment` (`PID`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_user_role` FOREIGN KEY (`role_ID`) REFERENCES `roles` (`RID`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_user_status` FOREIGN KEY (`status_ID`) REFERENCES `user_stat` (`USID`) ON UPDATE CASCADE;
 
 --

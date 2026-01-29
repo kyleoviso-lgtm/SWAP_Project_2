@@ -1,3 +1,9 @@
+<?php
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
