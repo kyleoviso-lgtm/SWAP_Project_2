@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2026 at 02:51 PM
+-- Generation Time: Jan 29, 2026 at 04:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -82,16 +82,17 @@ CREATE TABLE `item` (
 --
 
 INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`, `role_id`) VALUES
-(2, 'Test PC 2', 100.42, 'PC from 2019 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 1, 1),
-(3, 'TestPC 3', 901.45, 'Test PC 3', 0, 1),
-(91, 'test PC 23', 803.21, 'testpc23', 1, 1),
-(201, 'Test PC', 1023.24, 'This PC is so trash that even Om wouldn\'t use it as a bomb', 0, 1),
+(2, 'Test PC 2', 100.42, 'PC from 2019 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 1, 3),
+(91, 'test PC 23', 803.21, 'testpc23', 1, 4),
+(201, 'Test PC', 1023.24, 'This PC is so trash that even Om wouldn\'t use it as a bomb', 0, 4),
 (893, 'Test PC 123', 1842.32, 'TestPC123', 1, 1),
 (901, 'Test PC 345', 1024.94, 'Test PC 345', 0, 1),
 (903, 'My own PC', 958.23, 'My personal PC', 0, 1),
 (905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1, 1),
 (906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1, 1),
-(907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1, 1);
+(907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1, 1),
+(908, 'Mass Produca PC', 0.01, 'Whatever', 1, 3),
+(909, 'test PC 99', 1560.23, 'High performance PC with powerful CPU', 1, 4);
 
 -- --------------------------------------------------------
 
@@ -398,7 +399,7 @@ ALTER TABLE `colour`
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `IID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=908;
+  MODIFY `IID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=910;
 
 --
 -- AUTO_INCREMENT for table `item_audit_logging`
