@@ -1,9 +1,6 @@
 <?php
-// --------------------
-// DATABASE CONNECTION
-// --------------------
-$conn = new mysqli("localhost", "root", "", "mydb");
-if ($conn->connect_error) die("Database connection failed");
+
+require_once 'db.php';
 
 // --------------------
 // FILTER: ORDER TYPE

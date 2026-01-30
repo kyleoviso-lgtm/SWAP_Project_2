@@ -609,3 +609,31 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+
+.product-img {
+    max-width: 65%;
+    max-height:65%;
+    object-fit: contain;    /* keeps aspect ratio */
+    display: block;
+}
+
+.stock-badge {
+    position: absolute;
+    top: 180px;     /* move it down inside the 150px container */
+    right: 180px;
+    text-align: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    user-select: none;
+    white-space: nowrap;
+    background-color: #dc3545; 
+    z-index: 10;
+
+    display: inline-block;
+}
+
+
