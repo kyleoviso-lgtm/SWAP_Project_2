@@ -1,6 +1,6 @@
 <?php
 session_start();
-//Boot up DB connection + login authentication guard
+// Boot up DB connection + login authentication guard
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 
@@ -181,12 +181,22 @@ function statusClass($status) {
             </div>
         </div>
 
+        <!-- Admin Dashboard button (only for admins) -->
+        <?php if (strtolower($user['RoleName']) === 'admin'): ?>
+            <a href="dashboard_overview.php">
+                <div class="admin-dashboard-btn">
+                    <h3 class="admin-btn-text">Admin Dashboard</h3>
+                </div>
+            </a>
+        <?php endif; ?>
+
         <!-- Logout button -->
         <a href="process_files/process_logout.php">
             <div class="logout-btn">
                 <h3 class="logout-btn-text">logout</h3>
             </div>
         </a> 
+
     </div>
 </div>
 
