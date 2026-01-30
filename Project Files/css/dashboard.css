@@ -486,7 +486,7 @@ a {
 }
 
 .chart-placeholder {
-    height: 200px;
+    width: 100%;
 }
 
 .line-chart {
@@ -759,11 +759,9 @@ a {
 }
 
 .view-btn {
-    width: 100%;
-    
     background-color: #2c2f33;
     color: #dcddde;
-    padding: 8px 16px;
+    padding: 10px 18px;
     margin: 0px 8px;
 
     border-radius: 12px;

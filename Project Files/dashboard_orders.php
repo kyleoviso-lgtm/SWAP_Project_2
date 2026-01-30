@@ -114,6 +114,7 @@ function getOrderStatus($status_id) {
                                         echo "<td>" . date('M d, Y H:i', strtotime($row['order_time'])) . "</td>";
                                         echo "<td class='action-btn-cell'>
                                                 <button class='view-btn' onclick='viewOrder(" . $row['OID'] . ")'>View</button>
+                                                <button class='edit-btn' onclick='editOrder(" . $row['OID'] . ")'>Edit</button>
                                             </td>";
                                         echo "</tr>";
                                     }
@@ -182,6 +183,7 @@ function getOrderStatus($status_id) {
                                         echo "<td>" . date('M d, Y H:i', strtotime($row['order_time'])) . "</td>";
                                         echo "<td class='action-btn-cell'>
                                                 <button class='view-btn' onclick='viewOrder(" . $row['OID'] . ")'>View</button>
+                                                <button class='edit-btn' onclick='editOrder(" . $row['OID'] . ")'>Edit</button>
                                             </td>";
                                         echo "</tr>";
                                     }
@@ -240,6 +242,10 @@ function getOrderStatus($status_id) {
         // View order details function
         function viewOrder(orderId) {
             window.location.href = 'order_details.php?OID=' + orderId;
+        }
+        
+        function editOrder(orderId) {
+        window.location.href = 'edit_order.php?OID=' + orderId;
         }
     </script>
 

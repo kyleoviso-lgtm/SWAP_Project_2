@@ -67,7 +67,7 @@ if (isset($_SESSION['user_id'])) {
         </a>
         <a href="store_page.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'store_page.php' ? 'active' : ''; ?>">
             <span class="icon">💵</span>
-            <span>Store Paoge</span>
+            <span>Store Page</span>
         </a>
     </nav>
 
