@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 30, 2026 at 11:25 AM
+-- Generation Time: Jan 30, 2026 at 02:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -31,7 +31,7 @@ CREATE TABLE `address` (
   `AID` int(11) NOT NULL,
   `address_line_1` varchar(45) NOT NULL,
   `address_line_2` varchar(45) NOT NULL,
-  `city` varchar(45) NOT NULL,
+  `city` varchar(45) DEFAULT NULL,
   `country` varchar(45) NOT NULL,
   `ZIP_code` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -390,6 +390,12 @@ ALTER TABLE `user_stat`
 --
 
 --
+-- AUTO_INCREMENT for table `address`
+--
+ALTER TABLE `address`
+  MODIFY `AID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `colour`
 --
 ALTER TABLE `colour`
@@ -429,7 +435,7 @@ ALTER TABLE `payment`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `RID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `RID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `size`

@@ -37,7 +37,7 @@ $source = $_POST['source'] ?? 'signup'; // default public signup
 // Map source to file names
 $redirects = [
     'admin' => 'dashboard_users.php',
-    'signup' => 'login.php',
+    'signup' => 'login_page.php',
 ];
 
 // Base redirect file for this request
