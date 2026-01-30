@@ -63,7 +63,7 @@ $session = \Stripe\Checkout\Session::create([
     'payment_method_types' => ['card'],
     'line_items'           => $line_items,
     'mode'                 => 'payment',
-    'success_url'          => 'http://localhost/SWAP_Project_2/Project%20Files/pay.php',
+    'success_url'          => 'http://localhost/SWAP_Project_2/Project%20Files/pay.php?cs={CHECKOUT_SESSION_ID}',
     'cancel_url'           => 'http://localhost/SWAP_Project_2/Project%20Files/cart.php',
     'shipping_address_collection' => [
         'allowed_countries' => ['SG','US','CA'],
@@ -81,7 +81,7 @@ $session = \Stripe\Checkout\Session::create([
             ],
         ],
     ],
-    // Pass the actual logged-in user ID here
+
     'metadata' => [
         'user_id' => $user_id,
         'cart'    => json_encode($metadata_cart),

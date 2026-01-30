@@ -1,30 +1,25 @@
 <?php
-//Boot up DB connection + login authentication guard
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-
-$userRole = $_SESSION['role']; // 'enterprise' or 'regular'
+$userRole = $_SESSION['role']; // 'individual' or others
 $userName = $_SESSION['username'];
-
-
+$userInitials = strtoupper(substr($userName, 0, 2));
 
 if ($userRole === 'individual') {
-
     $sql = "
-            SELECT IID, name, price, description, availability 
-            FROM item 
-            WHERE role_ID = 3
-            ORDER BY name ASC
-        ";
-
-
-
-    $stmt = $connection->prepare($sql);
+        SELECT IID, name, price, description, availability
+        FROM item
+        WHERE role_ID = 3
+        ORDER BY name ASC
+    ";
 } else {
-    $sql = "SELECT IID, name, price, description, availability FROM item ORDER BY name ASC";
-    $stmt = $connection->prepare($sql);
+    $sql = "
+        SELECT IID, name, price, description, availability
+        FROM item
+        ORDER BY name ASC
+    ";
 }
 
 $stmt = $conn->prepare($sql);
@@ -102,38 +97,39 @@ $conn->close();
         </div>
 
         <div class="products-grid" id="products-grid">
-            <?php if (!$items): ?>
-                <div class="empty-state">No products available.</div>
-            <?php else: ?>
-                <?php foreach ($items as $item): ?>
-                    <div class="product-card card-link"
-                         data-href="item_page.php?iid=<?= (int)$item['IID'] ?>"
-                         data-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
-                         data-description="<?= htmlspecialchars(strtolower($item['description'])) ?>"
-                         data-price="<?= (float)$item['price'] ?>"
-                         data-availability="<?= (int)$item['availability'] ?>">
+<?php if (!$items): ?>
+    <div class="empty-state">No products available.</div>
+<?php else: ?>
+    <?php foreach ($items as $item): ?>
+        <div class="product-card card-link"
+            data-href="item_page.php?iid=<?= (int)$item['IID'] ?>"
+            data-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
+            data-description="<?= htmlspecialchars(strtolower($item['description'])) ?>"
+            data-price="<?= (float)$item['price'] ?>"
+            data-availability="<?= (int)$item['availability'] ?>">
 
-                        <div class="product-image">
-                            <img src="images/items/computer.webp" alt="Product Image" class="product-img">
+            <div class="product-image">
+                <img src="images/items/computer.webp" alt="Product Image" class="product-img">
 
-                            <?php if ((int)$item['availability'] === 1): ?>
-                                <span class="stock-badge in-stock">Available</span>
-                            <?php else: ?>
-                                <span class="stock-badge out-of-stock">Unavailable</span>
-                            <?php endif; ?>
-                        </div>
+                <?php if ((int)$item['availability'] === 1): ?>
+                    <span class="stock-badge in-stock">Available</span>
+                <?php else: ?>
+                    <span class="stock-badge out-of-stock">Unavailable</span>
+                <?php endif; ?>
+            </div>
 
-                <div class="sidebar-footer">
-                    <a href="profile.php">
-                        <div class="user-profile">
-                            <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
-                            <div class="user-info">
-                                <div class="user-name"><?= htmlspecialchars($userName) ?></div>
-                                <div class="user-role"><?= htmlspecialchars($userRole) ?></div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+            <div class="product-info">
+                <h3><?= htmlspecialchars($item['name']) ?></h3>
+                <p><?= htmlspecialchars($item['description']) ?></p>
+                <span class="price">$<?= number_format($item['price'], 2) ?></span>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+</div>
+
+
+                
             </div>
 
 </div>
