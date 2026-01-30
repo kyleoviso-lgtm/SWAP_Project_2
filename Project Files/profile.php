@@ -183,7 +183,7 @@ function statusClass($status) {
 
         <!-- Admin Dashboard button (only for admin & staff) -->
         <?php if (in_array(strtolower($user['RoleName']), ['admin', 'staff'])): ?>
-            <a href="admin_dashboard.php">
+            <a href="dashboard_overview.php">
                 <div class="admin-dashboard-btn btn-primary" style="margin:10px 0; padding:10px 20px; width:200px; text-align:center;">
                     <h3 class="admin-btn-text">Admin Dashboard</h3>
                 </div>
