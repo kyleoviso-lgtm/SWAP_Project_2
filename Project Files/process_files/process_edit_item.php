@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Bind parameters: s = string, d = double, i = integer
+    // Bind parameters
     $stmt->bind_param("ssdsiis", $IID, $name, $price, $description, $availability, $role_id, $original_IID);
 
     if ($stmt->execute()) {
