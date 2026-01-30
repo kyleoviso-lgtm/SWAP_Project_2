@@ -1,25 +1,23 @@
 <?php
-// Boot up DB connection + login authentication guard
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-$userRole = $_SESSION['role']; // 'enterprise' or 'individual'
+$userRole = $_SESSION['role']; // 'individual' or others
 $userName = $_SESSION['username'];
 $userInitials = strtoupper(substr($userName, 0, 2));
 
-// Query logic
 if ($userRole === 'individual') {
     $sql = "
-        SELECT IID, name, price, description, availability 
-        FROM item 
-        WHERE role_id = 3
+        SELECT IID, name, price, description, availability
+        FROM item
+        WHERE role_ID = 3
         ORDER BY name ASC
     ";
 } else {
     $sql = "
-        SELECT IID, name, price, description, availability 
-        FROM item 
+        SELECT IID, name, price, description, availability
+        FROM item
         ORDER BY name ASC
     ";
 }
@@ -33,11 +31,14 @@ $stmt->close();
 $conn->close();
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <title>Store</title>
+
 <link rel="stylesheet" href="css/store_page.css">
 <link rel="stylesheet" href="css/sidebar.css">
 </head>
@@ -78,7 +79,7 @@ $conn->close();
         <div class="sidebar-footer">
             <a href="profile.php">
                 <div class="user-profile">
-                    <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
+                    <div class="avatar"><?= strtoupper(substr($userName,0,2)) ?></div>
                     <div class="user-info">
                         <div class="user-name"><?= htmlspecialchars($userName) ?></div>
                         <div class="user-role"><?= htmlspecialchars(ucfirst($userRole)) ?></div>
@@ -96,37 +97,41 @@ $conn->close();
         </div>
 
         <div class="products-grid" id="products-grid">
-            <?php if (!$items): ?>
-                <div class="empty-state">No products available.</div>
-            <?php else: ?>
-                <?php foreach ($items as $item): ?>
-                    <div class="product-card card-link"
-                         data-href="item_page.php?iid=<?= (int)$item['IID'] ?>"
-                         data-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
-                         data-description="<?= htmlspecialchars(strtolower($item['description'])) ?>"
-                         data-price="<?= (float)$item['price'] ?>"
-                         data-availability="<?= (int)$item['availability'] ?>">
+<?php if (!$items): ?>
+    <div class="empty-state">No products available.</div>
+<?php else: ?>
+    <?php foreach ($items as $item): ?>
+        <div class="product-card card-link"
+            data-href="item_page.php?iid=<?= (int)$item['IID'] ?>"
+            data-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
+            data-description="<?= htmlspecialchars(strtolower($item['description'])) ?>"
+            data-price="<?= (float)$item['price'] ?>"
+            data-availability="<?= (int)$item['availability'] ?>">
 
-                        <div class="product-image">
-                            <img src="images/items/computer.webp" alt="Product Image" class="product-img">
+            <div class="product-image">
+                <img src="images/items/computer.webp" alt="Product Image" class="product-img">
 
-                            <?php if ((int)$item['availability'] === 1): ?>
-                                <span class="stock-badge in-stock">Available</span>
-                            <?php else: ?>
-                                <span class="stock-badge out-of-stock">Unavailable</span>
-                            <?php endif; ?>
-                        </div>
+                <?php if ((int)$item['availability'] === 1): ?>
+                    <span class="stock-badge in-stock">Available</span>
+                <?php else: ?>
+                    <span class="stock-badge out-of-stock">Unavailable</span>
+                <?php endif; ?>
+            </div>
 
-                        <div class="product-info">
-                            <h3><?= htmlspecialchars($item['name']) ?></h3>
-                            <p><?= htmlspecialchars($item['description']) ?></p>
-                            <p class="price">$<?= number_format($item['price'], 2) ?></p>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+            <div class="product-info">
+                <h3><?= htmlspecialchars($item['name']) ?></h3>
+                <p><?= htmlspecialchars($item['description']) ?></p>
+                <span class="price">$<?= number_format($item['price'], 2) ?></span>
+            </div>
         </div>
-    </section>
+    <?php endforeach; ?>
+<?php endif; ?>
+</div>
+
+
+                
+            </div>
+
 </div>
 </main>
 
