@@ -1,19 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
-session_start();
-
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 // Now you can run your table queries safely
 $sql = "SELECT 
@@ -53,6 +41,9 @@ $enterprise_count = $conn->query("
 
 $total_count = $result->num_rows;
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
  
 <head>
     <meta charset="UTF-8">

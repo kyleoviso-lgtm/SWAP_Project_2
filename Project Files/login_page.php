@@ -90,7 +90,7 @@
                 </form>
 
                 <div class="form-footer">
-                    <p>Don't have an account? <a href="#">Sign up</a></p>
+                    <p>Don't have an account? <a href="signup_page.php">Sign up</a></p>
                 </div>
             </div>
         </div>

@@ -1,13 +1,8 @@
 <?php
-
-require_once 'db.php';
-session_start();
-
-// Require login
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: login_page.php');
-    exit;
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
+require_once 'user_info_fetcher.php';
 
 
 $userRole = $_SESSION['role']; // 'enterprise' or 'regular'
@@ -32,13 +27,16 @@ if ($userRole === 'individual') {
     $stmt = $connection->prepare($sql);
 }
 
+$stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
 $items = $result->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
-$connection->close();
+$conn->close();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -125,16 +123,18 @@ $connection->close();
                             <?php endif; ?>
                         </div>
 
-                        <div class="product-info">
-                            <h3><?= htmlspecialchars($item['name']) ?></h3>
-                            <p><?= htmlspecialchars($item['description']) ?></p>
-                            <div class="product-price">$<?= number_format($item['price'], 2) ?></div>
+                <div class="sidebar-footer">
+                    <a href="profile.php">
+                        <div class="user-profile">
+                            <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
+                            <div class="user-info">
+                                <div class="user-name"><?= htmlspecialchars($userName) ?></div>
+                                <div class="user-role"><?= htmlspecialchars($userRole) ?></div>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </section>
+                    </a>
+                </div>
+            </div>
 
 </div>
 </main>

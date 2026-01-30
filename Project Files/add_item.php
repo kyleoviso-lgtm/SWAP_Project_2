@@ -1,38 +1,15 @@
 <?php
 // add_item.php
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
+require_once 'bootstrap.php';   // includes DB connection + session start
+require_once 'auth_guard.php';  // ensures user is logged in
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Fetch customer roles for the dropdown
+$roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RoleName ASC");
+
+if (!$roles) {
+    die("Database query failed: " . $conn->error);
 }
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-    $description = $_POST['description'];
-    $availability = isset($_POST['availability']) ? (int)$_POST['availability'] : 0;
-
-    $stmt = $conn->prepare("INSERT INTO item (name, price, description, availability) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sdsi", $name, $price, $description, $availability);
-
-    if ($stmt->execute()) {
-        // Redirect back to product management dashboard after successful insert
-        header("Location: dashboard_product_management.php");
-        exit;
-    } else {
-        $error = "Error: " . $stmt->error;
-    }
-
-    $stmt->close();
-}
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -44,54 +21,9 @@ $conn->close();
     <link rel="stylesheet" href="css/add_edit_item.css">
 </head>
 <body>
-    <aside class="sidebar">
-        <!-- Sidebar -->
-        <div class="sidebar-header">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="#5865f2"/>
-                </svg>
-                <span>Store Dashboard</span>
-            </div>
-        </div>
 
-        <nav class="sidebar-nav">
-            <a href="dashboard.php" class="nav-item">
-                <span class="icon">📊</span>
-                <span>Overview</span>
-            </a>
-            <a href="dashboard_product_management.php" class="nav-item active">
-                <span class="icon">📦</span>
-                <span>Product Management</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">🛒</span>
-                <span>Orders</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">👥</span>
-                <span>Customers</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">💰</span>
-                <span>Revenue</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="icon">⚙️</span>
-                <span>Settings</span>
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="avatar">JD</div>
-                <div class="user-info">
-                    <div class="user-name">John Doe</div>
-                    <div class="user-role">Admin</div>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <!-- Sidebar -->
+    <?php include 'sidebar.php'; ?>
 
     <main class="main-content">
         <header class="topbar">
@@ -111,21 +43,18 @@ $conn->close();
                         <p>Fill in the details below to add a new product to your inventory</p>
                     </div>
 
-                    <?php if (isset($error)) : ?>
-                        <p style="color:#ed4245; margin-bottom:16px;"><?= htmlspecialchars($error) ?></p>
+                    <?php if (isset($_SESSION['action_status'])): ?>
+                        <div class="<?= $_SESSION['action_status']['type'] === 'success' ? 'success-banner' : 'error-banner' ?>">
+                            <?= htmlspecialchars($_SESSION['action_status']['message']) ?>
+                        </div>
+                        <?php unset($_SESSION['action_status']); ?>
                     <?php endif; ?>
 
-                    <form method="POST" action="" class="add-item-form">
+                    <form method="POST" action="process_files/process_add_item.php" class="add-item-form">
                         <div class="form-row">
                             <div class="form-group full-width">
                                 <label for="name">Product Name <span class="required">*</span></label>
-                                <input 
-                                    type="text" 
-                                    id="name" 
-                                    name="name" 
-                                    placeholder="Enter product name"
-                                    required
-                                >
+                                <input type="text" id="name" name="name" placeholder="Enter product name" required>
                             </div>
                         </div>
 
@@ -135,17 +64,7 @@ $conn->close();
                                 <div class="input-with-icon-section">
                                     <div class="payment-input-container">
                                         <span class="input-icon">$</span>
-                                        <input 
-                                            type="text" 
-                                            id="price" 
-                                            name="price"
-                                            placeholder="0.00"
-                                            min="0"
-                                            inputmode="decimal"
-                                            pattern="[0-9]*\.?[0-9]*"
-                                            required
-                                        >
-
+                                        <input type="text" id="price" name="price" placeholder="0.00" required>
                                     </div>
                                 </div>
                             </div>
@@ -162,30 +81,39 @@ $conn->close();
 
                         <div class="form-row">
                             <div class="form-group full-width">
+                                <label for="role_id">Target Customer Type <span class="required">*</span></label>
+                                <select id="role_id" name="role_id" required>
+                                    <option value="" disabled selected>Select customer type</option>
+                                    <?php
+                                    if ($roles && $roles->num_rows > 0) {
+                                        while ($role = $roles->fetch_assoc()) {
+                                            echo "<option value='" . htmlspecialchars($role['RID']) . "'>" 
+                                                . htmlspecialchars(ucfirst($role['RoleName'])) 
+                                                . "</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <span class="helper-text">This product will be visible only to the selected customer type</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
                                 <label for="description">Description <span class="required">*</span></label>
-                                <textarea 
-                                    id="description" 
-                                    name="description" 
-                                    rows="5"
-                                    placeholder="Enter product description"
-                                    required
-                                ></textarea>
+                                <textarea id="description" name="description" rows="5" placeholder="Enter product description" required></textarea>
                                 <span class="helper-text">Provide a detailed description of the product</span>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" class="btn-cancel" onclick="window.location.href='dashboard_product_management.php'">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn-submit">
-                                Add Product
-                            </button>
+                            <button type="button" class="btn-cancel" onclick="window.location.href='dashboard_product_management.php'">Cancel</button>
+                            <button type="submit" class="btn-submit">Add Product</button>
                         </div>
                     </form>
                 </div>
 
-                <div class="info-card">
+                 <div class="info-card">
                     <div class="info-header">
                         <span class="info-icon">💡</span>
                         <h3>Tips for Adding Products</h3>
@@ -198,8 +126,10 @@ $conn->close();
                         <li>Review all information before submitting</li>
                     </ul>
                 </div>
+                
             </div>
         </div>
     </main>
+
 </body>
 </html>
