@@ -36,11 +36,72 @@
 
         <div class="form-section">
             <div class="form-container">
+
+                <!-- ========================= -->
+                <!-- STATUS BANNERS -->
+                <!-- ========================= -->
+                <?php if (isset($_GET['status'])): ?>
+                    <?php
+                        $status = $_GET['status'];
+                        $bannerClass = str_starts_with($status, 'success')
+                            ? 'success-banner'
+                            : 'error-banner';
+
+                        $message = '';
+
+                        switch ($status) {
+                            // --- Success ---
+                            case 'success_signup':
+                                $message = '✅ Account created successfully. Please log in.';
+                                break;
+
+                            // --- Login Errors ---
+                            case 'error_invalid_credentials':
+                                $message = '⚠️ Invalid email or password.';
+                                break;
+
+                            case 'error_account_inactive':
+                                $message = '⚠️ Your account is not active yet.';
+                                break;
+
+                            // --- Signup Errors (fallbacks) ---
+                            case 'error_missing_fields':
+                                $message = '⚠️ Please fill in all required fields.';
+                                break;
+
+                            case 'error_invalid_email':
+                                $message = '⚠️ Invalid email address.';
+                                break;
+
+                            case 'error_duplicate_user':
+                                $message = '⚠️ An account with this email already exists.';
+                                break;
+
+                            case 'error_db':
+                                $message = '⚠️ A database error occurred. Please try again.';
+                                break;
+
+                            default:
+                                $message = '⚠️ An unexpected error occurred.';
+                                break;
+                        }
+                    ?>
+                    <div class="<?php echo $bannerClass; ?>">
+                        <?php echo htmlspecialchars($message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- ========================= -->
+                <!-- FORM HEADER -->
+                <!-- ========================= -->
                 <div class="form-header">
                     <h2>Sign In</h2>
                     <p>Enter your credentials to continue</p>
                 </div>
 
+                <!-- ========================= -->
+                <!-- LOGIN FORM -->
+                <!-- ========================= -->
                 <form class="login-form" action="process_files/process_login.php" method="POST">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -89,9 +150,13 @@
                     </button>
                 </form>
 
+                <!-- ========================= -->
+                <!-- FOOTER -->
+                <!-- ========================= -->
                 <div class="form-footer">
                     <p>Don't have an account? <a href="signup_page.php">Sign up</a></p>
                 </div>
+
             </div>
         </div>
     </div>
