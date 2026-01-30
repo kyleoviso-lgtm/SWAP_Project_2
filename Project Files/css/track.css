@@ -1,0 +1,103 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #2c2f33;
+    color: #dcddde;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.track-container {
+    max-width: 1000px;
+    width: 100%;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.search-form {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.search-form input {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #202225;
+    background-color: #36393f;
+    color: #dcddde;
+    outline: none;
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-form button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #5865f2;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-form button:hover {
+    background-color: #4752c4;
+}
+
+.no-orders {
+    text-align: center;
+    color: #b9bbbe;
+    font-size: 16px;
+}
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.order-card {
+    background-color: #36393f;
+    border: 1px solid #202225;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s;
+    word-wrap: break-word; /* ensures long text wraps */
+}
+
+.order-card:hover {
+    transform: translateY(-4px);
+    border-color: #5865f2;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #b9bbbe;
+    overflow-wrap: anywhere; /* handles long order_hash */
+}
+
+.order-hash {
+    max-width: 60%;
+    overflow-wrap: anywhere;
+}
+
+.order-info p {
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.order-info strong {
+    color: #ffffff;
+}
