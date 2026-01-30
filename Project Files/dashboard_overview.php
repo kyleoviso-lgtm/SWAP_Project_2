@@ -1,3 +1,39 @@
+<?php
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
+
+// Fetch recent orders (latest 5)
+$recent_sql = "
+SELECT 
+    o.OID,
+    o.user_id,
+    o.item_id,
+    o.item_qty,
+    o.order_price,
+    o.order_status_id,
+    o.order_time,
+    i.name AS item_name
+FROM order_table o
+JOIN item i ON o.item_id = i.IID
+ORDER BY o.order_time DESC
+LIMIT 5
+";
+
+$recent_result = $conn->query($recent_sql);
+
+function getOrderStatus($status_id) {
+    switch ($status_id) {
+        case 1: return ['class' => 'pending', 'text' => 'Pending'];
+        case 2: return ['class' => 'processing', 'text' => 'Manufacturing'];
+        case 3: return ['class' => 'processing', 'text' => 'Shipping'];
+        case 4: return ['class' => 'completed', 'text' => 'Completed'];
+        case 5: return ['class' => 'cancelled', 'text' => 'Cancelled'];
+        default: return ['class' => 'pending', 'text' => 'Unknown'];
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +41,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Dashboard</title>
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/visualization.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -77,32 +116,9 @@
                 <div class="chart-card">
                     <div class="card-header">
                         <h3>Sales Overview</h3>
-                        <select class="chart-select">
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last 90 days</option>
-                        </select>
                     </div>
                     <div class="chart-placeholder">
-                        <svg viewBox="0 0 400 200" class="line-chart">
-                            <polyline
-                                fill="none"
-                                stroke="#5865f2"
-                                stroke-width="3"
-                                points="0,150 50,120 100,140 150,80 200,100 250,60 300,90 350,40 400,70"
-                            />
-                            <polyline
-                                fill="url(#gradient)"
-                                stroke="none"
-                                points="0,150 50,120 100,140 150,80 200,100 250,60 300,90 350,40 400,70 400,200 0,200"
-                            />
-                            <defs>
-                                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#5865f2;stop-opacity:0.3" />
-                                    <stop offset="100%" style="stop-color:#5865f2;stop-opacity:0" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
+                        <?php include 'visualization_element.php'; ?>
                     </div>
                 </div>
 
@@ -157,8 +173,9 @@
             <div class="table-card">
                 <div class="card-header">
                     <h3>Recent Orders</h3>
-                    <button class="btn-secondary">View All</button>
+                    <a href="dashboard_orders.php" class="btn-secondary">View All</a>
                 </div>
+
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
@@ -166,56 +183,45 @@
                                 <th>Order ID</th>
                                 <th>Customer</th>
                                 <th>Product</th>
+                                <th>Qty</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>#ORD-2847</td>
-                                <td>Sarah Johnson</td>
-                                <td>Wireless Headphones</td>
-                                <td>$129.99</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 12, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2846</td>
-                                <td>Mike Wilson</td>
-                                <td>Gaming Mouse</td>
-                                <td>$79.99</td>
-                                <td><span class="status-badge processing">Processing</span></td>
-                                <td>Jan 12, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2845</td>
-                                <td>Emily Davis</td>
-                                <td>Laptop Stand</td>
-                                <td>$45.50</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 11, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2844</td>
-                                <td>Alex Brown</td>
-                                <td>USB-C Cable</td>
-                                <td>$19.99</td>
-                                <td><span class="status-badge pending">Pending</span></td>
-                                <td>Jan 11, 2026</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-2843</td>
-                                <td>Lisa Anderson</td>
-                                <td>Mechanical Keyboard</td>
-                                <td>$159.99</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>Jan 10, 2026</td>
-                            </tr>
+                            <?php
+                            if ($recent_result->num_rows > 0) {
+                                while ($row = $recent_result->fetch_assoc()) {
+                                    $status = getOrderStatus($row['order_status_id']);
+
+                                    echo "<tr>";
+                                    echo "<td><strong>#ORD-" . htmlspecialchars($row['OID']) . "</strong></td>";
+                                    echo "<td>User " . htmlspecialchars($row['user_id']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['item_name']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['item_qty']) . "</td>";
+                                    echo "<td>$" . number_format($row['order_price'], 2) . "</td>";
+                                    echo "<td>
+                                            <span class='status-badge {$status['class']}'>
+                                                {$status['text']}
+                                            </span>
+                                        </td>";
+                                    echo "<td>" . date('M d, Y', strtotime($row['order_time'])) . "</td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr>
+                                        <td colspan='7' class='no-data'>
+                                            No recent orders found
+                                        </td>
+                                    </tr>";
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
     </main>
 </body>

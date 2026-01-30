@@ -1,24 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb"; // your schema name
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 // Fetch data from item table
-$sql = "SELECT IID, name, price, description, availability FROM item";
+$sql = "
+    SELECT i.IID, i.name, i.price, i.description, i.availability, r.RoleName
+    FROM item i
+    JOIN roles r ON i.role_id = r.RID
+";
 $result = $conn->query($sql);
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -33,6 +28,20 @@ $result = $conn->query($sql);
 
     <!-- Main Content -->
     <main class="main-content">
+        
+        <?php if (isset($_SESSION['action_status'])): ?>
+            <?php
+            $type = $_SESSION['action_status']['type'];
+            $bannerClass = ($type === 'success') ? 'success-banner' : 'error-banner';
+            ?>
+            <div class="<?php echo $bannerClass; ?>">
+                <?php 
+                echo htmlspecialchars($_SESSION['action_status']['message']); 
+                unset($_SESSION['action_status']);
+                ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Top Bar -->
         <header class="topbar">
             <div class="topbar-left">
@@ -76,6 +85,7 @@ $result = $conn->query($sql);
                                 <th>Price ($)</th>
                                 <th>Description</th>
                                 <th class="available-clmn">Availability</th>
+                                <th class="role-clmn">Target Customer</th>
                                 <th class="actions-clmn">Actions</th>
                             </tr>
                         </thead>
@@ -89,32 +99,34 @@ $result = $conn->query($sql);
                                     echo "<td>$" . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
                                     echo "<td>" . htmlspecialchars($row['description']) . "</td>";
 
-                                    // Check availability
+                                    // Availability badge
                                     if ($row['availability'] == 0) {
                                         echo "<td class='availability-cell'><span class='status-badge pending'>Unavailable</span></td>";
                                     } else {
                                         echo "<td class='availability-cell'><span class='status-badge completed'>Available</span></td>";
                                     }
 
-                                    // Edit button and delete button
+                                    // Role ID
+                                    echo "<td class='role-cell'>" . htmlspecialchars($row['RoleName']) . "</td>";
+
+                                    // Edit and Delete buttons
                                     echo "<td class='action-btn-cell'>
-                                                <a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a>
-                                                <form method='post' action='delete_item.php' style='display:inline; margin:0;'>
-                                                    <input type='hidden' name='IID' value='" . htmlspecialchars($row['IID']) . "'>
-                                                    <button type='submit' class='delete-btn'>Delete</button>
-                                                </form>
-                                            </td>";
+                                            <a class='edit-btn' href='edit_item.php?IID=" . urlencode($row['IID']) . "'>Edit</a>
+                                            <form method='post' action='process_files/process_delete_item.php' style='display:inline; margin:0;'>
+                                                <input type='hidden' name='IID' value='" . htmlspecialchars($row['IID']) . "'>
+                                                <button type='submit' class='delete-btn'>Delete</button>
+                                            </form>
+                                        </td>";
 
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No items found</td></tr>";
+                                echo "<tr><td colspan='7'>No items found</td></tr>";
                             }
                             ?>
                         </tbody>
                     </table>
                 </div>
-
             </div>
 
             <!-- JavaScript for Search Filter -->

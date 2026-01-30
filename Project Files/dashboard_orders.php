@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+//Boot up DB connection + login authentication guard
+require_once 'bootstrap.php';
+require_once 'auth_guard.php';
 
 // Fetch active orders (order_status_id != completed/cancelled, adjust based on your status IDs)
 $active_sql = "SELECT OID, user_id, order_status_id, item_id, colour_id, size_id, payment_id, 
@@ -42,6 +31,9 @@ function getOrderStatus($status_id) {
     }
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -122,6 +114,7 @@ function getOrderStatus($status_id) {
                                         echo "<td>" . date('M d, Y H:i', strtotime($row['order_time'])) . "</td>";
                                         echo "<td class='action-btn-cell'>
                                                 <button class='view-btn' onclick='viewOrder(" . $row['OID'] . ")'>View</button>
+                                                <button class='edit-btn' onclick='editOrder(" . $row['OID'] . ")'>Edit</button>
                                             </td>";
                                         echo "</tr>";
                                     }
@@ -190,6 +183,7 @@ function getOrderStatus($status_id) {
                                         echo "<td>" . date('M d, Y H:i', strtotime($row['order_time'])) . "</td>";
                                         echo "<td class='action-btn-cell'>
                                                 <button class='view-btn' onclick='viewOrder(" . $row['OID'] . ")'>View</button>
+                                                <button class='edit-btn' onclick='editOrder(" . $row['OID'] . ")'>Edit</button>
                                             </td>";
                                         echo "</tr>";
                                     }
@@ -248,6 +242,10 @@ function getOrderStatus($status_id) {
         // View order details function
         function viewOrder(orderId) {
             window.location.href = 'order_details.php?OID=' + orderId;
+        }
+        
+        function editOrder(orderId) {
+        window.location.href = 'edit_order.php?OID=' + orderId;
         }
     </script>
 

@@ -1,0 +1,241 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #23272a 0%, #2c2f33 100%);
+    color: #dcddde;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.signup-container {
+    background-color: #36393f;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid #202225;
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #5865f2, #7289da);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+}
+
+.logo-section h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.logo-section p {
+    font-size: 14px;
+    color: #b9bbbe;
+}
+
+.error-banner,
+.success-banner {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.error-banner {
+    background-color: rgba(237, 66, 69, 0.15);
+    color: #ed4245;
+    border: 1px solid rgba(237, 66, 69, 0.3);
+}
+
+.success-banner {
+    background-color: rgba(67, 181, 129, 0.15);
+    color: #43b581;
+    border: 1px solid rgba(67, 181, 129, 0.3);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b9bbbe;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.required {
+    color: #ed4245;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: #202225;
+    border: 1px solid #1a1d20;
+    border-radius: 6px;
+    color: #dcddde;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+}
+
+.form-group input::placeholder {
+    color: #72767d;
+}
+
+.helper-text {
+    display: block;
+    font-size: 12px;
+    color: #72767d;
+    margin-top: 6px;
+}
+
+.password-requirements {
+    background-color: #2c2f33;
+    border: 1px solid #202225;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.password-requirements h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #b9bbbe;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+}
+
+.password-requirements li {
+    font-size: 13px;
+    color: #72767d;
+    padding: 4px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.password-requirements li::before {
+    content: "•";
+    position: absolute;
+    left: 6px;
+    color: #5865f2;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background-color: #5865f2;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 8px;
+}
+
+.btn-submit:hover {
+    background-color: #4752c4;
+}
+
+.btn-submit:active {
+    transform: translateY(1px);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #202225;
+}
+
+.divider span {
+    padding: 0 12px;
+    font-size: 12px;
+    color: #72767d;
+    font-weight: 600;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #b9bbbe;
+}
+
+.login-link a {
+    color: #5865f2;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.login-link a:hover {
+    color: #7289da;
+    text-decoration: underline;
+}
+
+.terms-text {
+    font-size: 12px;
+    color: #72767d;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+.terms-text a {
+    color: #5865f2;
+    text-decoration: none;
+}
+
+.terms-text a:hover {
+    text-decoration: underline;
+}
