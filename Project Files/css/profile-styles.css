@@ -335,3 +335,30 @@ a {
 .logout-btn-text {
   color: #dcddde;
 }
+
+/* Admin Dashboard button styles */
+.admin-dashboard-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 10%;
+  border-radius: 10px;
+  
+  margin: 6px;
+  padding: 8px 10px;
+
+  background-color: var(--accent-blue);
+  color: var(--text-white);
+
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.admin-dashboard-btn:hover {
+  transform: translateY(-2px) translateX(1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.admin-btn-text {
+  color: var(--text-white);
+}
