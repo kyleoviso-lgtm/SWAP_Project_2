@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2026 at 04:43 PM
+-- Generation Time: Jan 30, 2026 at 11:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -29,8 +29,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `address` (
   `AID` int(11) NOT NULL,
-  `street_name` varchar(45) NOT NULL,
-  `unit_number` varchar(10) NOT NULL,
+  `address_line_1` varchar(45) NOT NULL,
+  `address_line_2` varchar(45) NOT NULL,
   `city` varchar(45) NOT NULL,
   `country` varchar(45) NOT NULL,
   `ZIP_code` int(11) NOT NULL
@@ -40,7 +40,7 @@ CREATE TABLE `address` (
 -- Dumping data for table `address`
 --
 
-INSERT INTO `address` (`AID`, `street_name`, `unit_number`, `city`, `country`, `ZIP_code`) VALUES
+INSERT INTO `address` (`AID`, `address_line_1`, `address_line_2`, `city`, `country`, `ZIP_code`) VALUES
 (1, 'John Avenue', '#03-09', 'Singapore', 'Singapore', 123456);
 
 -- --------------------------------------------------------
@@ -158,7 +158,7 @@ CREATE TABLE `order_table` (
 --
 
 INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colour_id`, `size_id`, `payment_id`, `address_id`, `item_qty`, `order_time`, `order_hash`, `order_price`) VALUES
-(12, '1', 3, 2, 1, 2, 1, 1, 12, '2026-01-21 03:34:52', '182845', 104.00),
+(12, '1', 4, 2, 1, 2, 1, 1, 12, '2026-01-21 03:34:52', '182845', 104.00),
 (15, '1', 5, 906, 1, 1, 1, 1, 1, '2026-01-21 03:36:13', '12498141', 109.34);
 
 -- --------------------------------------------------------
