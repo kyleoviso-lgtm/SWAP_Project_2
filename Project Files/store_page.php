@@ -1,15 +1,28 @@
 <?php
-//Boot up DB connection + login authentication guard
+// Boot up DB connection + login authentication guard
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-$minPrice = filter_input(INPUT_GET, 'min_price', FILTER_VALIDATE_FLOAT);
-$maxPrice = filter_input(INPUT_GET, 'max_price', FILTER_VALIDATE_FLOAT);
-$inStock = isset($_GET['in_stock']);
-$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+$userRole = $_SESSION['role']; // 'enterprise' or 'individual'
+$userName = $_SESSION['username'];
+$userInitials = strtoupper(substr($userName, 0, 2));
 
-$sql = 'SELECT name, price, description, IID, availability FROM item ORDER BY name ASC';
+// Query logic
+if ($userRole === 'individual') {
+    $sql = "
+        SELECT IID, name, price, description, availability 
+        FROM item 
+        WHERE role_id = 3
+        ORDER BY name ASC
+    ";
+} else {
+    $sql = "
+        SELECT IID, name, price, description, availability 
+        FROM item 
+        ORDER BY name ASC
+    ";
+}
 
 $stmt = $conn->prepare($sql);
 $stmt->execute();
@@ -20,183 +33,158 @@ $stmt->close();
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manufacturing Products Store</title>
-    <link rel="stylesheet" href="css/store_page.css?v=<?php echo filemtime(__DIR__ . '/css/store_page.css'); ?>">
-    <link rel="stylesheet" href="css/sidebar.css">
+<meta charset="UTF-8">
+<title>Store</title>
+<link rel="stylesheet" href="css/store_page.css">
+<link rel="stylesheet" href="css/sidebar.css">
 </head>
 <body>
-    <main class="main-content">
-        <header class="topbar">
-            <div class="search-bar">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" placeholder="Search products, categories, or suppliers...">
-            </div>
-            <div class="topbar-right">
-                <button class="icon-btn">
-                    <span>🔔</span>
-                    <span class="badge-small">5</span>
-                </button>
-                <button class="icon-btn">
-                    <span>🛒</span>
-                </button>
-            </div>
-        </header>
 
-        <div class="store-content">
-            <div class="filters-section">
-                <div class="section-header">
-                    <h2>Filters</h2>
-                    <a class="text-btn" id="clear-filters-btn">Clear All</a>
-                </div>
+<main class="main-content">
 
-                <div id="filters-form">
-                    <div class="filter-group">
-                        <h3 class="filter-title">Availability</h3>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="in-stock-filter">
-                            <span>Available for manufacturing</span>
-                        </label>
-                    </div>
+<header class="topbar">
+    <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search products...">
+        <label class="checkbox-label" style="margin-left:12px;">
+            <input type="checkbox" id="in-stock-filter">
+            <span>Available</span>
+        </label>
+    </div>
+    <div class="topbar-right">
+        <a href="cart.php" class="icon-btn"><span>🛒</span></a>
+    </div>
+</header>
 
-                    <div class="filter-group">
-                        <h3 class="filter-title">Price Range</h3>
-                        <div class="price-inputs">
-                            <input type="number" step="0.01" min="0" id="min-price-filter" placeholder="Min" class="price-input">
-                            <span>—</span>
-                            <input type="number" step="0.01" min="0" id="max-price-filter" placeholder="Max" class="price-input">
-                        </div>
-                    </div>
-                </div>
+<div class="store-content">
 
-                <div class="footer-separator">
-
-                </div>
-
-                <div class="sidebar-footer">
-                    <a href="profile.php">
-                        <div class="user-profile">
-                            <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
-                            <div class="user-info">
-                                <div class="user-name"><?= htmlspecialchars($userName) ?></div>
-                                <div class="user-role"><?= htmlspecialchars($userRole) ?></div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <div class="products-section">
-                <div class="products-header">
-                    <div class="results-info">
-                        <h2>All Products</h2>
-                        <span class="results-count"><span id="product-count"><?php echo count($items); ?></span> products found</span>
-                    </div>
-                </div>
-
-                <div class="products-grid" id="products-grid">
-                    <?php if (!$items): ?>
-                        <div class="empty-state">No products match your filters.</div>
-                    <?php else: ?>
-                        <?php foreach ($items as $item): ?>
-                            <div class="product-card card-link" data-href="item_page.php?iid=<?php echo urlencode((string)$item['IID']); ?>" data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>" data-description="<?php echo htmlspecialchars(strtolower($item['description'])); ?>" data-price="<?php echo htmlspecialchars((float)$item['price']); ?>" data-availability="<?php echo htmlspecialchars((int)$item['availability']); ?>">
-                                <div class="product-image">
-                                    <div class="image-placeholder">🏭</div>
-                                    <?php if ((int)$item['availability'] === 1): ?>
-                                        <span class="stock-badge in-stock">Available</span>
-                                    <?php else: ?>
-                                        <span class="stock-badge out-of-stock">Unavailable</span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="product-info">
-                                    <div class="product-category">IID: <?php echo htmlspecialchars((string)$item['IID']); ?></div>
-                                    <h3 class="product-name"><?php echo htmlspecialchars($item['name']); ?></h3>
-                                    <div class="product-specs">
-                                        <span><?php echo htmlspecialchars($item['description']); ?></span>
-                                    </div>
-                                    <div class="product-footer">
-                                        <div class="product-price">$<?php echo number_format((float)$item['price'], 2); ?></div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
+    <!-- FILTER SIDEBAR -->
+    <aside class="filters-section">
+        <div class="section-header">
+            <h2>Filters</h2>
+            <button class="text-btn" id="clear-filters-btn">Clear All</button>
         </div>
-    </main>
 
-    <script>
-        const searchInput = document.getElementById('search-input');
-        const minPriceInput = document.getElementById('min-price-filter');
-        const maxPriceInput = document.getElementById('max-price-filter');
-        const inStockCheckbox = document.getElementById('in-stock-filter');
-        const clearFiltersBtn = document.getElementById('clear-filters-btn');
-        const productCards = document.querySelectorAll('.product-card');
-        const clickableCards = document.querySelectorAll('.card-link');
-        const productCount = document.getElementById('product-count');
+        <div class="filter-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="in-stock-filter-sidebar">
+                <span>Available</span>
+            </label>
+        </div>
 
-        function filterProducts() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const minPrice = parseFloat(minPriceInput.value) || 0;
-            const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
-            const filterInStock = inStockCheckbox.checked;
+        <div class="sidebar-footer">
+            <a href="profile.php">
+                <div class="user-profile">
+                    <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
+                    <div class="user-info">
+                        <div class="user-name"><?= htmlspecialchars($userName) ?></div>
+                        <div class="user-role"><?= htmlspecialchars(ucfirst($userRole)) ?></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </aside>
 
-            let visibleCount = 0;
+    <!-- PRODUCTS -->
+    <section class="products-section">
+        <div class="products-header">
+            <h2>Products</h2>
+            <span><span id="product-count"><?= count($items) ?></span> found</span>
+        </div>
 
-            productCards.forEach(card => {
-                const name = card.dataset.name;
-                const description = card.dataset.description;
-                const price = parseFloat(card.dataset.price);
-                const availability = parseInt(card.dataset.availability);
+        <div class="products-grid" id="products-grid">
+            <?php if (!$items): ?>
+                <div class="empty-state">No products available.</div>
+            <?php else: ?>
+                <?php foreach ($items as $item): ?>
+                    <div class="product-card card-link"
+                         data-href="item_page.php?iid=<?= (int)$item['IID'] ?>"
+                         data-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
+                         data-description="<?= htmlspecialchars(strtolower($item['description'])) ?>"
+                         data-price="<?= (float)$item['price'] ?>"
+                         data-availability="<?= (int)$item['availability'] ?>">
 
-                const matchesSearch = name.includes(searchTerm) || description.includes(searchTerm);
-                const matchesPrice = price >= minPrice && price <= maxPrice;
-                const matchesStock = !filterInStock || availability === 1;
+                        <div class="product-image">
+                            <img src="images/items/computer.webp" alt="Product Image" class="product-img">
 
-                const isVisible = matchesSearch && matchesPrice && matchesStock;
+                            <?php if ((int)$item['availability'] === 1): ?>
+                                <span class="stock-badge in-stock">Available</span>
+                            <?php else: ?>
+                                <span class="stock-badge out-of-stock">Unavailable</span>
+                            <?php endif; ?>
+                        </div>
 
-                if (isVisible) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+                        <div class="product-info">
+                            <h3><?= htmlspecialchars($item['name']) ?></h3>
+                            <p><?= htmlspecialchars($item['description']) ?></p>
+                            <p class="price">$<?= number_format($item['price'], 2) ?></p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+</div>
+</main>
 
-            productCount.textContent = visibleCount;
-        }
+<script>
+const searchInput = document.getElementById('search-input');
+const inStockTop = document.getElementById('in-stock-filter'); // top bar
+const inStockSidebar = document.getElementById('in-stock-filter-sidebar'); // sidebar
+const productCards = document.querySelectorAll('.product-card');
+const productCount = document.getElementById('product-count');
 
-        function clearFilters() {
-            searchInput.value = '';
-            minPriceInput.value = '';
-            maxPriceInput.value = '';
-            inStockCheckbox.checked = false;
-            filterProducts();
-        }
+/**
+ * Filter products by search and availability
+ */
+function filterProducts() {
+    const search = searchInput.value.toLowerCase();
+    const inStock = inStockTop.checked || inStockSidebar.checked; // either checkbox
 
-        searchInput.addEventListener('input', filterProducts);
-        minPriceInput.addEventListener('input', filterProducts);
-        maxPriceInput.addEventListener('input', filterProducts);
-        inStockCheckbox.addEventListener('change', filterProducts);
-        clearFiltersBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            clearFilters();
-        });
+    let count = 0;
 
-        clickableCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const href = card.dataset.href;
-                if (href) {
-                    window.location.href = href;
-                }
-            });
-        });
-    </script>
+    productCards.forEach(card => {
+        const name = card.dataset.name;
+        const desc = card.dataset.description;
+        const available = parseInt(card.dataset.availability);
+
+        const matches =
+            (name.includes(search) || desc.includes(search)) &&
+            (!inStock || available === 1);
+
+        card.style.display = matches ? '' : 'none';
+        if (matches) count++;
+    });
+
+    productCount.textContent = count;
+}
+
+/**
+ * Keep both checkboxes in sync
+ */
+inStockTop.addEventListener('change', () => {
+    inStockSidebar.checked = inStockTop.checked;
+    filterProducts();
+});
+
+inStockSidebar.addEventListener('change', () => {
+    inStockTop.checked = inStockSidebar.checked;
+    filterProducts();
+});
+
+// Run filtering when typing in search
+searchInput.addEventListener('input', filterProducts);
+
+// Make product cards clickable
+document.querySelectorAll('.card-link').forEach(card => {
+    card.addEventListener('click', () => {
+        window.location.href = card.dataset.href;
+    });
+});
+</script>
+
 </body>
 </html>

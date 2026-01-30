@@ -113,7 +113,7 @@
         </div>
 
         <div class="login-link">
-            <a href="login.php">Log in instead</a>
+            <a href="login_page.php">Log in instead</a>
         </div>
 
         <div class="terms-text">
