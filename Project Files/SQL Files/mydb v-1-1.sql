@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 30, 2026 at 02:58 PM
+-- Generation Time: Jan 30, 2026 at 04:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -169,7 +169,7 @@ INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colo
 
 CREATE TABLE `payment` (
   `PID` int(11) NOT NULL,
-  `token` int(11) NOT NULL
+  `token` int(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -243,16 +243,19 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`UID`, `username`, `role_ID`, `status_ID`, `payment_ID`, `address_ID`, `email`, `password_hash`) VALUES
+('0d145bed-fde4-11f0-9ea6-a05950b924a8', 'Signup test user2', 2, 3, NULL, NULL, 'Signup2.test@gmail.com', '$2y$10$H3Ra0Doti/uTATOwJHMRpODYuBo5LLQx5mMJJuPcFWvfjxBsG26su'),
 ('1', 'John SWAP Tester', 1, 1, 1, 1, 'john.tester@gmail.com', '1234561234'),
 ('1bd706ac-fc8c-11f0-90b0-a05950b924a8', 'test user 3', 2, 6, 1, 1, 'test.user.3@gmail.com', '$2y$10$5/pxuoePhQniizGLwCLojOTX2hWBMEdjhO/3Vc.XUU0OZa/3RciXe'),
 ('2', 'John Customer', 3, 1, 1, 1, 'yoooooo.yo@hotmail.com', 'qowr1u1313t'),
+('249c16a0-fde4-11f0-9ea6-a05950b924a8', 'signup test user 3', 2, 3, NULL, NULL, 'Signup3.test@gmail.com', '$2y$10$ZXQ19ikEVPnn4gSFxPKWu.799roKw8HRSwx5Sr67LvED5XCWrCsgG'),
 ('3', 'John Enterprise', 4, 1, 1, 1, 'Aw.shucks@hotmail.com', '9quegoqegjqeg'),
 ('75281e3f-fc8b-11f0-90b0-a05950b924a8', 'staff dude', 1, 2, 1, 1, 'staff.dude@gmail.com', '$2y$10$ZG9QAFVffrGU0nRUHAADceM/OM1cjU534RbdENA1/4fkT7festm.K'),
 ('899c0bfb-fbb9-11f0-90b0-a05950b924a8', '2404716I@student.tp.edu.sg', 4, 2, NULL, NULL, '2404716I@student.tp.edu.sg', '$2y$10$CTCoTphW49u.8l.TzmBdeeQu7TCtJ0tXS/F7w.LVtfxXIgMmy/PmO'),
 ('a745f9d2-fc86-11f0-90b0-a05950b924a8', 'Ombruh', 2, 4, 1, 1, 'Om.bruh@gmail.com', '$2y$10$0Jd.Vpo6LwxMwr6Y4QJLVeJnDPBcXjY53NKfBERXnOCLBCZQYbFuW'),
 ('ab957136-fc91-11f0-90b0-a05950b924a8', 'Login Tester', 1, 1, 1, 1, 'test.login@gmail.com', '$2y$10$iQcLLpwb7auf2jgcsYee7eckggXfI3NY57L7DWUHCDl2BPz..0Mjy'),
 ('bdd0f262-fb55-11f0-90b0-a05950b924a8', 'testttt', 3, 3, NULL, NULL, 'johnny.test@gmail.com', '$2y$10$WIFXlJf3ZEuYisp1F3PGWObsQFCrgzdnc01QytSUfUOpMFnUEyHcu'),
-('dd2c7cdb-fb55-11f0-90b0-a05950b924a8', 'bleh', 3, 3, NULL, NULL, 'bleh.bleh@gmail.com', '$2y$10$ictBQTukL8rORmqsgD7oNO53vENXzs40SLG9z9vtdO0PB.A22/h0m');
+('dd2c7cdb-fb55-11f0-90b0-a05950b924a8', 'bleh', 3, 3, NULL, NULL, 'bleh.bleh@gmail.com', '$2y$10$ictBQTukL8rORmqsgD7oNO53vENXzs40SLG9z9vtdO0PB.A22/h0m'),
+('f79ec246-fde3-11f0-9ea6-a05950b924a8', 'Signup test user', 2, 3, NULL, NULL, 'Signup.test@gmail.com', '$2y$10$6D.ju.2pXOeBaJfPy6k6WuZgRvhI4B8LZno3Q0kx8xG7gZN1G2wYy');
 
 -- --------------------------------------------------------
 

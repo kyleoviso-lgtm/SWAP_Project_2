@@ -1,30 +1,27 @@
 <?php
-//Boot up DB connection + login authentication guard
+// Boot up DB connection + login authentication guard
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-
-$userRole = $_SESSION['role']; // 'enterprise' or 'regular'
+$userRole = $_SESSION['role']; // 'enterprise' or 'individual'
 $userName = $_SESSION['username'];
+$userInitials = strtoupper(substr($userName, 0, 2));
 
-
-
+// Query logic
 if ($userRole === 'individual') {
-
     $sql = "
-            SELECT IID, name, price, description, availability 
-            FROM item 
-            WHERE role_ID = 3
-            ORDER BY name ASC
-        ";
-
-
-
-    $stmt = $connection->prepare($sql);
+        SELECT IID, name, price, description, availability 
+        FROM item 
+        WHERE role_id = 3
+        ORDER BY name ASC
+    ";
 } else {
-    $sql = "SELECT IID, name, price, description, availability FROM item ORDER BY name ASC";
-    $stmt = $connection->prepare($sql);
+    $sql = "
+        SELECT IID, name, price, description, availability 
+        FROM item 
+        ORDER BY name ASC
+    ";
 }
 
 $stmt = $conn->prepare($sql);
@@ -36,14 +33,11 @@ $stmt->close();
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <title>Store</title>
-
 <link rel="stylesheet" href="css/store_page.css">
 <link rel="stylesheet" href="css/sidebar.css">
 </head>
@@ -84,7 +78,7 @@ $conn->close();
         <div class="sidebar-footer">
             <a href="profile.php">
                 <div class="user-profile">
-                    <div class="avatar"><?= strtoupper(substr($userName,0,2)) ?></div>
+                    <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
                     <div class="user-info">
                         <div class="user-name"><?= htmlspecialchars($userName) ?></div>
                         <div class="user-role"><?= htmlspecialchars(ucfirst($userRole)) ?></div>
@@ -123,19 +117,16 @@ $conn->close();
                             <?php endif; ?>
                         </div>
 
-                <div class="sidebar-footer">
-                    <a href="profile.php">
-                        <div class="user-profile">
-                            <div class="avatar"><?= htmlspecialchars($userInitials) ?></div>
-                            <div class="user-info">
-                                <div class="user-name"><?= htmlspecialchars($userName) ?></div>
-                                <div class="user-role"><?= htmlspecialchars($userRole) ?></div>
-                            </div>
+                        <div class="product-info">
+                            <h3><?= htmlspecialchars($item['name']) ?></h3>
+                            <p><?= htmlspecialchars($item['description']) ?></p>
+                            <p class="price">$<?= number_format($item['price'], 2) ?></p>
                         </div>
-                    </a>
-                </div>
-            </div>
-
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
 </div>
 </main>
 
