@@ -3,16 +3,8 @@
 
 <?php
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'bootstrap.php';   // includes DB connection + session start
+require_once 'auth_guard.php';  // ensures user is logged in
 
 // Fetch roles for dropdown
 $roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RID ASC");
@@ -24,7 +16,7 @@ $statuses = $conn->query("SELECT USID, status_name FROM user_stat ORDER BY USID 
 $payments = $conn->query("SELECT PID, token FROM payment ORDER BY PID ASC");
 
 // Fetch addresses for dropdown (optional)
-$addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as address_display FROM address ORDER BY AID ASC");
+$addresses = $conn->query("SELECT AID, CONCAT(address_line_1, ', ', city) as address_display FROM address ORDER BY AID ASC");
 ?>
 
 
@@ -92,6 +84,7 @@ $addresses = $conn->query("SELECT AID, CONCAT(street_name, ', ', city) as addres
                     <form method="POST" action="process_files/process_add_user.php" class="add-user-form">
                         <input type="hidden" name="source" value="admin">
                         <input type="hidden" name="return_url" value="dashboard_users.php">
+                         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <!-- Username and Email Row -->
                         <div class="form-row">
                             <div class="form-group">

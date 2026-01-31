@@ -350,7 +350,7 @@ $total_count = $result->num_rows;
 
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
-                window.location.href = 'process_filesprocess_delete_user.php?UID=' + userId;
+                window.location.href = 'process_files/process_delete_user.php?UID=' + userId;
             }
         }
     </script>
