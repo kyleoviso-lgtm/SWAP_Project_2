@@ -10,10 +10,7 @@ require_once __DIR__ . '/../auth_guard.php';
 // --------------------
 // Debug flag
 // --------------------
-$debug = true; // set to false when done testing
-echo "<p style='color: green;'>Session ID: " . session_id() . "</p>";
-echo "<p style='color: blue;'>CSRF Token: " . ($_SESSION['csrf_token'] ?? 'NONE') . "</p>";
-
+$debug = false; // Turn off for production
 
 function debug_log($message) {
     global $debug;
@@ -23,22 +20,33 @@ function debug_log($message) {
 }
 
 // --------------------
-// Helper redirect function (with debug)
-/// --------------------
+// Helper redirect function
+// --------------------
 function redirect($file, $status, $type = 'error') {
     global $debug;
+
+    // Root-relative base path for your localhost project
+    $basePath = '/SWAP_Part_2/SWAP_Project_2/Project%20Files/';
+
+    // Clean up file path
+    $file = preg_replace('#^(\.\./|\.\/)+#', '', $file);
+
+    // Construct full redirect URL
+    $url = $basePath . ltrim($file, '/');
+
     if ($debug) {
-        echo "<p style='color: orange;'>Redirect triggered → $file ($status)</p>";
+        echo "<p style='color: orange;'>Redirect triggered → $url ($status)</p>";
         exit;
     } else {
         $_SESSION['action_status'] = [
             'type' => $type,
             'message' => $status
         ];
-        header("Location: $file");
+        header("Location: $url");
         exit();
     }
 }
+
 
 // --------------------
 // 1️⃣ Request method check
@@ -86,7 +94,7 @@ $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-    debug_log("Missing field(s): username='$username', email='$email', password='$password', confirm='$confirm_password'");
+    debug_log("Missing field(s): username='$username', email='$email'");
     redirect($redirect_file, "Please fill in all required fields.");
 }
 
@@ -141,6 +149,14 @@ if ($source === 'admin') {
     $address_ID = null;
 }
 
+// Ensure IDs are integers or null
+foreach (['role_ID', 'status_ID', 'payment_ID', 'address_ID'] as $var) {
+    if (isset($$var) && !is_null($$var) && !ctype_digit((string) $$var)) {
+        $$var = null;
+    } else {
+        $$var = is_null($$var) ? null : (int) $$var;
+    }
+}
 debug_log("Role=$role_ID, Status=$status_ID, Payment=$payment_ID, Address=$address_ID");
 
 // --------------------
