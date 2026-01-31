@@ -3,23 +3,42 @@
 require_once 'db.php';
 require_once 'payment_flow.php';
 
-// Require login
+// verify session token
+require_once 'csrf.php';
+csrf_verify();
+
+
+// require login
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: login_page.php');
     exit;
 }
+
+// if redirected from failed checkout, clear the checkout lock
+if (isset($_GET['checkout_cancelled'])) {
+    unset($_SESSION['checkout_in_progress']);
+    unset($_SESSION['pending_order_id']);
+}
+
 
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-// Handle checkout submit
+// checkout
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
+
+    // prevent race condition
+    if (!empty($_SESSION['checkout_in_progress'])) {
+        header('Location: checkout.php');
+        exit;
+    }
+
     if (empty($_SESSION['cart'])) {
         $error = 'Your cart is empty.';
     } else {
-        // Redirect to checkout page
+        $_SESSION['checkout_in_progress'] = true;
         enable_checkout();
         header('Location: checkout.php');
         exit;
@@ -27,22 +46,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 }
 
 
-// Handle AJAX actions
+
+// ajax
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
 
     $action = $_POST['action'];
 
-    // Add to cart
+    // add to cart
     if ($action === 'add') {
         $iid = (int)($_POST['iid'] ?? 0);
-        $sizeId = $_POST['size'] ?? '';
-        $sizeText = $_POST['size_text'] ?? '';
-        $colourId = $_POST['colour'] ?? '';
-        $colourText = $_POST['colour_text'] ?? '';
+
+        $sizeId = (int)($_POST['size'] ?? 0);
+
+        $colourId = (int)($_POST['colour'] ?? 0);
+
+        $stmt = $connection->prepare(
+            'SELECT name FROM colour WHERE CID = ? LIMIT 1'
+        );
+        $stmt->bind_param('i', $colourId);
+        $stmt->execute();
+        $colourData = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+
+        if (!$colourData) {
+            echo json_encode(['success' => false, 'error' => 'Invalid colour']);
+            exit;
+        }
+
+        $colourText = $colourData['name'];
+
+
         $qty = max(1, (int)($_POST['qty'] ?? 1));
 
-        // Fetch item price from DB
+        // fetch item price from db
         $stmt = $connection->prepare('SELECT name, price, availability FROM item WHERE IID = ? LIMIT 1');
         $stmt->bind_param('i', $iid);
         $stmt->execute();
@@ -54,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit;
         }
 
-        // Fetch size multiplier
+        // fetch size multiplier
         $stmt = $connection->prepare('SELECT size, size_price_multi FROM size WHERE SID = ? LIMIT 1');
         $stmt->bind_param('i', $sizeId);
         $stmt->execute();
@@ -68,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         $price = $item['price'] * (float)$sizeData['size_price_multi'];
 
-        // Create unique key: iid-size-colour
+        // create unique key: iid-size-colour
         $key = $iid . '-' . $sizeId . '-' . $colourId;
 
         if (isset($_SESSION['cart'][$key])) {
@@ -78,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 'iid' => $iid,
                 'name' => $item['name'],
                 'size' => $sizeId,
-                'size_text' => $sizeText ?: $sizeData['size'],
+                'size_text' => $sizeData['size'],
                 'colour' => $colourId,
                 'colour_text' => $colourText,
                 'price' => $price,
@@ -90,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
-    // Update quantity
+    // update quantity
     if ($action === 'update_qty') {
         $key = $_POST['key'] ?? '';
         $delta = (int)($_POST['delta'] ?? 0);
@@ -104,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
-    // Remove item
+    // remove item
     if ($action === 'remove') {
         $key = $_POST['key'] ?? '';
         unset($_SESSION['cart'][$key]);
@@ -149,21 +187,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             ?>
                 <div class="cart-item">
                     <div class="item-info">
-                        <p><strong><?= htmlspecialchars($item['name']) ?></strong></p>
+                        <h3 class="item-title"><?= htmlspecialchars($item['name']) ?></h3>
                         <p>Size: <?= htmlspecialchars($item['size_text']) ?></p>
                         <p>Colour: <?= htmlspecialchars($item['colour_text']) ?></p>
 
 
-                        <p>
+                        <p class="qty-row">
                             Qty:
-                            <button onclick="updateQty('<?= $key ?>', -1)">−</button>
-                            <?= $item['qty'] ?>
-                            <button onclick="updateQty('<?= $key ?>', 1)">+</button>
+                            <span class="qty-controls">
+                                <button type="button" class="qty-btn" onclick="updateQty('<?= $key ?>', -1)">−</button>
+                                <span class="qty-value"><?= $item['qty'] ?></span>
+                                <button type="button" class="qty-btn" onclick="updateQty('<?= $key ?>', 1)">+</button>
+                            </span>
                         </p>
 
                         <p>Price: $<?= number_format($itemTotal, 2) ?></p>
 
-                        <button onclick="removeItem('<?= $key ?>')">Remove</button>
+                        <button type="button" class="remove-btn" onclick="removeItem('<?= $key ?>')">Remove</button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -175,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <?php endif; ?>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                 <button type="submit" name="checkout" class="checkout-btn">
                     Proceed to Checkout
                 </button>
@@ -192,7 +233,8 @@ function updateQty(key, delta) {
         body: new URLSearchParams({
             action: 'update_qty',
             key: key,
-            delta: delta
+            delta: delta,
+            csrf_token: '<?= csrf_token() ?>'
         })
     }).then(() => location.reload());
 }
@@ -203,10 +245,12 @@ function removeItem(key) {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: new URLSearchParams({
             action: 'remove',
-            key: key
+            key: key,
+            csrf_token: '<?= csrf_token() ?>'
         })
     }).then(() => location.reload());
 }
+
 </script>
 
 </body>

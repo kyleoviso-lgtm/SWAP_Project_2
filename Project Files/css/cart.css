@@ -49,8 +49,9 @@ body {
 }
 
 .remove-btn {
+
     background-color: #ed4245;
-    color: #fff;
+    color: #ffffff;
     border: none;
     padding: 6px 12px;
     border-radius: 6px;
@@ -74,4 +75,59 @@ body {
 
 .checkout-btn:hover {
     background-color: #4752c4;
+}
+
+/* ---------- Quantity Row ---------- */
+
+.qty-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+/* ---------- Quantity Controls Container ---------- */
+
+.qty-controls {
+    display: inline-flex;
+    align-items: center;
+    background-color: #23272a;
+    border: 1px solid #ffffff;
+    border-radius: 6px;
+    overflow: hidden; /* makes buttons feel unified */
+    scale: 0.85;
+}
+
+/* ---------- +/- Buttons ---------- */
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: #2c2f33;
+    color: #dcddde;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: background-color 0.15s ease;
+}
+
+.qty-btn:hover {
+    background-color: #36393f;
+}
+
+/* ---------- Quantity Value ---------- */
+
+.qty-value {
+    min-width: 26px;
+    text-align: center;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #2c2f33;
 }

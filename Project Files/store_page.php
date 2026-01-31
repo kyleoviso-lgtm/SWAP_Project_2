@@ -3,10 +3,11 @@ require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-$userRole = $_SESSION['role']; // 'individual' or others
+$userRole = $_SESSION['role']; // chk for indiv or enterprise
 $userName = $_SESSION['username'];
 $userInitials = strtoupper(substr($userName, 0, 2));
 
+// filter based on role perms
 if ($userRole === 'individual') {
     $sql = "
         SELECT IID, name, price, description, availability
@@ -50,10 +51,6 @@ $conn->close();
     <div class="search-bar">
         <span class="search-icon">🔍</span>
         <input type="text" id="search-input" placeholder="Search products...">
-        <label class="checkbox-label" style="margin-left:12px;">
-            <input type="checkbox" id="in-stock-filter">
-            <span>Available</span>
-        </label>
     </div>
     <div class="topbar-right">
         <a href="cart.php" class="icon-btn"><span>🛒</span></a>
@@ -62,7 +59,7 @@ $conn->close();
 
 <div class="store-content">
 
-    <!-- FILTER SIDEBAR -->
+    <!-- filters -->
     <aside class="filters-section">
         <div class="section-header">
             <h2>Filters</h2>
@@ -74,6 +71,15 @@ $conn->close();
                 <input type="checkbox" id="in-stock-filter-sidebar">
                 <span>Available</span>
             </label>
+        </div>
+
+        <div class="filter-group">
+            <div class="filter-title">Price Range</div>
+            <div class="price-inputs">
+                <input type="number" id="price-min" class="price-input" placeholder="Min" min="0" step="0.01">
+                <span>—</span>
+                <input type="number" id="price-max" class="price-input" placeholder="Max" min="0" step="0.01">
+            </div>
         </div>
 
         <div class="sidebar-footer">
@@ -89,7 +95,7 @@ $conn->close();
         </div>
     </aside>
 
-    <!-- PRODUCTS -->
+    <!-- items -->
     <section class="products-section">
         <div class="products-header">
             <h2>Products</h2>
@@ -137,8 +143,9 @@ $conn->close();
 
 <script>
 const searchInput = document.getElementById('search-input');
-const inStockTop = document.getElementById('in-stock-filter'); // top bar
 const inStockSidebar = document.getElementById('in-stock-filter-sidebar'); // sidebar
+const priceMinInput = document.getElementById('price-min');
+const priceMaxInput = document.getElementById('price-max');
 const productCards = document.querySelectorAll('.product-card');
 const productCount = document.getElementById('product-count');
 
@@ -147,7 +154,11 @@ const productCount = document.getElementById('product-count');
  */
 function filterProducts() {
     const search = searchInput.value.toLowerCase();
-    const inStock = inStockTop.checked || inStockSidebar.checked; // either checkbox
+    const inStock = inStockSidebar.checked;
+    const minPrice = parseFloat(priceMinInput.value);
+    const maxPrice = parseFloat(priceMaxInput.value);
+    const hasMin = !Number.isNaN(minPrice);
+    const hasMax = !Number.isNaN(maxPrice);
 
     let count = 0;
 
@@ -155,10 +166,16 @@ function filterProducts() {
         const name = card.dataset.name;
         const desc = card.dataset.description;
         const available = parseInt(card.dataset.availability);
+        const price = parseFloat(card.dataset.price);
+
+        const priceMatches =
+            (!hasMin || price >= minPrice) &&
+            (!hasMax || price <= maxPrice);
 
         const matches =
             (name.includes(search) || desc.includes(search)) &&
-            (!inStock || available === 1);
+            (!inStock || available === 1) &&
+            priceMatches;
 
         card.style.display = matches ? '' : 'none';
         if (matches) count++;
@@ -167,18 +184,12 @@ function filterProducts() {
     productCount.textContent = count;
 }
 
-/**
- * Keep both checkboxes in sync
- */
-inStockTop.addEventListener('change', () => {
-    inStockSidebar.checked = inStockTop.checked;
+inStockSidebar.addEventListener('change', () => {
     filterProducts();
 });
 
-inStockSidebar.addEventListener('change', () => {
-    inStockTop.checked = inStockSidebar.checked;
-    filterProducts();
-});
+priceMinInput.addEventListener('input', filterProducts);
+priceMaxInput.addEventListener('input', filterProducts);
 
 // Run filtering when typing in search
 searchInput.addEventListener('input', filterProducts);

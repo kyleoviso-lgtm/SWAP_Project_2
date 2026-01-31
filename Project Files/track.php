@@ -1,18 +1,14 @@
 <?php
 session_start();
+
+// db connect
 require_once 'db.php';
 
-// Require login
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: login_page.php');
-    exit;
-}
-
-$user_id = $_SESSION['user_id'] ?? null;
+// display order based on user hash (public - dont req login)
 $order_hash = trim($_GET['order_hash'] ?? '');
 $orders = [];
 
-if ($user_id && $order_hash !== '') {
+if ($order_hash !== '') {
     $sql = "
         SELECT 
             o.order_hash,
@@ -29,13 +25,12 @@ if ($user_id && $order_hash !== '') {
         JOIN colour c ON o.colour_id = c.CID
         JOIN size s ON o.size_id = s.SID
         JOIN order_stat os ON o.order_status_id = os.OSID
-        WHERE o.user_id = ?
-          AND o.order_hash = ?
+        WHERE o.order_hash = ?
         ORDER BY o.OID ASC
     ";
 
     $stmt = $connection->prepare($sql);
-    $stmt->bind_param('ss', $user_id, $order_hash);
+    $stmt->bind_param('s', $order_hash);
     $stmt->execute();
     $result = $stmt->get_result();
     $orders = $result->fetch_all(MYSQLI_ASSOC);
