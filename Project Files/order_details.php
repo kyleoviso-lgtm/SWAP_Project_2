@@ -4,17 +4,19 @@
 require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 
-$OID = $_GET['OID'] ?? null;
+// Validate OID from GET
+$OID = isset($_GET['OID']) ? (int)$_GET['OID'] : 0;
 
-if (!$OID) {
+if ($OID <= 0) {
     $_SESSION['action_status'] = [
         'type' => 'error',
         'message' => 'Invalid order ID.'
     ];
     header("Location: dashboard_orders.php");
-    exit;
+    exit();
 }
 
+// Fetch order details
 $stmt = $conn->prepare("
     SELECT
         o.OID,
@@ -22,24 +24,18 @@ $stmt = $conn->prepare("
         o.order_hash,
         o.item_qty,
         o.order_price,
-
         os.order_status,
-
         i.IID,
         i.name AS item_name,
-
         c.name AS colour_name,
         s.size AS size_name,
-
         u.username,
         u.email,
-
-        a.street_name,
-        a.unit_number,
+        a.address_line_1,
+        a.address_line_2,
         a.city,
         a.country,
         a.ZIP_code
-
     FROM order_table o
     JOIN order_stat os ON o.order_status_id = os.OSID
     JOIN item i ON o.item_id = i.IID
@@ -55,20 +51,21 @@ $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// Redirect if not found
 if (!$order) {
     $_SESSION['action_status'] = [
         'type' => 'error',
         'message' => 'Order not found.'
     ];
     header("Location: dashboard_orders.php");
-    exit;
+    exit();
 }
 
-// Status badge class mapping
+// Determine badge class
 $statusClass = match (strtolower($order['order_status'])) {
     'completed' => 'completed',
     'cancelled' => 'cancelled',
-    'shipping', 'manufacturing' => 'pending',
+    'shipping', 'manufacturing' => 'processing',
     default => 'pending'
 };
 ?>
@@ -76,7 +73,7 @@ $statusClass = match (strtolower($order['order_status'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Order #<?php echo htmlspecialchars($order['OID']); ?></title>
+    <title>Order #<?= htmlspecialchars($order['OID']); ?></title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/add_edit_item.css">
 </head>
@@ -89,7 +86,7 @@ $statusClass = match (strtolower($order['order_status'])) {
 <header class="topbar">
     <div class="topbar-left">
         <button class="back-btn" onclick="window.location.href='dashboard_orders.php'">← Back</button>
-        <h1>Order #<?php echo htmlspecialchars($order['OID']); ?></h1>
+        <h1>Order #<?= htmlspecialchars($order['OID']); ?></h1>
     </div>
 </header>
 
@@ -106,25 +103,25 @@ $statusClass = match (strtolower($order['order_status'])) {
         <div class="detail-row">
             <span class="detail-label">Status:</span>
             <span class="detail-value">
-                <span class="status-badge <?php echo $statusClass; ?>">
-                    <?php echo htmlspecialchars($order['order_status']); ?>
+                <span class="status-badge <?= $statusClass; ?>">
+                    <?= htmlspecialchars(ucfirst($order['order_status'])); ?>
                 </span>
             </span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Order Date:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['order_time']); ?></span>
+            <span class="detail-value"><?= date('M d, Y H:i', strtotime($order['order_time'])); ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Order Hash:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['order_hash']); ?></span>
+            <span class="detail-value"><code><?= htmlspecialchars($order['order_hash']); ?></code></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Total Price:</span>
-            <span class="detail-value">$<?php echo number_format($order['order_price'], 2); ?></span>
+            <span class="detail-value">$<?= number_format($order['order_price'], 2); ?></span>
         </div>
     </div>
 </div>
@@ -138,22 +135,22 @@ $statusClass = match (strtolower($order['order_status'])) {
     <div class="item-details">
         <div class="detail-row">
             <span class="detail-label">Item:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['item_name']); ?></span>
+            <span class="detail-value"><?= htmlspecialchars($order['item_name']); ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Quantity:</span>
-            <span class="detail-value"><?php echo $order['item_qty']; ?></span>
+            <span class="detail-value"><?= (int)$order['item_qty']; ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Colour:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['colour_name']); ?></span>
+            <span class="detail-value"><?= htmlspecialchars($order['colour_name']); ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Size:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['size_name']); ?></span>
+            <span class="detail-value"><?= htmlspecialchars($order['size_name']); ?></span>
         </div>
     </div>
 </div>
@@ -167,23 +164,21 @@ $statusClass = match (strtolower($order['order_status'])) {
     <div class="item-details">
         <div class="detail-row">
             <span class="detail-label">Customer:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['username']); ?></span>
+            <span class="detail-value"><?= htmlspecialchars($order['username']); ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Email:</span>
-            <span class="detail-value"><?php echo htmlspecialchars($order['email']); ?></span>
+            <span class="detail-value"><?= htmlspecialchars($order['email']); ?></span>
         </div>
 
         <div class="detail-row">
             <span class="detail-label">Address:</span>
             <span class="detail-value">
-                <?php
-                echo htmlspecialchars(
-                    "{$order['street_name']} {$order['unit_number']}, 
-                     {$order['city']}, {$order['country']} {$order['ZIP_code']}"
-                );
-                ?>
+                <?= htmlspecialchars(
+                    "{$order['address_line_1']}, {$order['address_line_2']}, " .
+                    "{$order['city']}, {$order['country']} {$order['ZIP_code']}"
+                ); ?>
             </span>
         </div>
     </div>

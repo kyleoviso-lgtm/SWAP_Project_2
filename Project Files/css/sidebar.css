@@ -4,7 +4,7 @@ a {
 
 /* Sidebar container */
 .sidebar {
-    width: 260px;
+    width: 180px;
     background-color: #23272a;
     display: flex;
     flex-direction: column;
@@ -43,7 +43,7 @@ a {
     color: #b9bbbe;
     text-decoration: none;
     transition: all 0.2s;
-    font-size: 15px;
+    font-size: 12px;
 }
 
 .nav-item:hover {

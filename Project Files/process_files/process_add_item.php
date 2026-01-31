@@ -35,10 +35,10 @@ if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST
 // --------------------
 $requiredFields = ['name', 'price', 'description', 'availability', 'role_id'];
 foreach ($requiredFields as $field) {
-    if (!isset($_POST[$field]) || $_POST[$field] === '') {
+    if (!isset($_POST[$field]) || trim($_POST[$field]) === '') {
         $_SESSION['action_status'] = [
             'type' => 'error',
-            'message' => "The field '$field' is required."
+            'message' => "The field '" . htmlspecialchars($field) . "' is required."
         ];
         header("Location: ../add_item.php");
         exit;
@@ -48,16 +48,16 @@ foreach ($requiredFields as $field) {
 // --------------------
 // 4. Sanitize & assign
 // --------------------
-$name = $_POST['name'];
-$price = (float) $_POST['price'];
-$description = $_POST['description'];
-$availability = (int)$_POST['availability'];
-$role_id = (int)$_POST['role_id'];
+$name = trim($_POST['name']);
+$description = trim($_POST['description']);
+$price = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);
+$availability = filter_var($_POST['availability'], FILTER_VALIDATE_INT);
+$role_id = filter_var($_POST['role_id'], FILTER_VALIDATE_INT);
 
 // --------------------
-// 5. Validate numeric price
+// 5. Validate numeric values
 // --------------------
-if (!is_numeric($price) || $price < 0) {
+if ($price === false || $price < 0) {
     $_SESSION['action_status'] = [
         'type' => 'error',
         'message' => "Price must be a valid positive number."
@@ -66,8 +66,17 @@ if (!is_numeric($price) || $price < 0) {
     exit;
 }
 
+if ($availability === false || !in_array($availability, [0, 1])) {
+    $_SESSION['action_status'] = [
+        'type' => 'error',
+        'message' => "Availability must be either 0 (Unavailable) or 1 (Available)."
+    ];
+    header("Location: ../add_item.php");
+    exit;
+}
+
 // --------------------
-// 6. Prepare INSERT statement
+// 6. Insert into database using prepared statements
 // --------------------
 $stmt = $conn->prepare("
     INSERT INTO item (name, price, description, availability, role_id)
@@ -77,7 +86,7 @@ $stmt = $conn->prepare("
 if (!$stmt) {
     $_SESSION['action_status'] = [
         'type' => 'error',
-        'message' => "Database preparation error: " . $conn->error
+        'message' => "Database preparation error: " . htmlspecialchars($conn->error)
     ];
     header("Location: ../add_item.php");
     exit;
@@ -98,10 +107,12 @@ if ($stmt->execute()) {
 } else {
     $_SESSION['action_status'] = [
         'type' => 'error',
-        'message' => "Insert failed: " . $stmt->error
+        'message' => "Insert failed: " . htmlspecialchars($stmt->error)
     ];
     header("Location: ../add_item.php");
     exit;
 }
 
 $stmt->close();
+$conn->close();
+?>

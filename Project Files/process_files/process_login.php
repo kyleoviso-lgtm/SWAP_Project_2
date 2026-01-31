@@ -26,7 +26,7 @@ function redirect($file, $params = []) {
 }
 
 // --------------------
-// 1. Only allow POST
+// 1. Only allow POST requests
 // --------------------
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     redirect("login_page.php", ['status' => 'error_invalid_request']);
@@ -35,12 +35,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 // --------------------
 // 2. CSRF TOKEN VALIDATION
 // --------------------
-if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
     redirect("login_page.php", ['status' => 'error_csrf_invalid']);
 }
 
 // --------------------
-// 3. Get input
+// 3. Get input safely
 // --------------------
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
@@ -50,6 +50,10 @@ $password = $_POST['password'] ?? '';
 // --------------------
 if (empty($email) || empty($password)) {
     redirect("login_page.php", ['status' => 'error_missing_fields']);
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    redirect("login_page.php", ['status' => 'error_invalid_email']);
 }
 
 // --------------------
@@ -63,6 +67,11 @@ $stmt = $conn->prepare("
     WHERE u.email = ?
     LIMIT 1
 ");
+
+if (!$stmt) {
+    redirect("login_page.php", ['status' => 'error_db']);
+}
+
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -72,6 +81,7 @@ if ($result->num_rows === 0) {
 }
 
 $user = $result->fetch_assoc();
+$stmt->close();
 
 // --------------------
 // 6. Check password
@@ -88,18 +98,20 @@ if (strtolower($user['status_name']) !== 'active') {
 }
 
 // --------------------
-// 8. Login successful - create session
+// 8. Login successful - initialize session
 // --------------------
+session_regenerate_id(true); // prevent session fixation
+
 $_SESSION['user_id'] = $user['UID'];
 $_SESSION['username'] = $user['username'];
 $_SESSION['role'] = strtolower($user['RoleName']);
 $_SESSION['logged_in'] = true;
 
-// Regenerate session ID to prevent session fixation
-session_regenerate_id(true);
-
-// Regenerate CSRF token after login
+// Generate a fresh CSRF token after login
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+// Optional: track login timestamp
+$_SESSION['last_login'] = time();
 
 // --------------------
 // 9. Redirect based on role
@@ -107,13 +119,15 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 switch ($_SESSION['role']) {
     case 'admin':
     case 'staff':
-        redirect("dashboard_overview.php", ['status' => 'successful_login']);
+        redirect("dashboard_overview.php", ['status' => 'success_login']);
         break;
     case 'individual':
     case 'enterprise':
         redirect("store_page.php", ['status' => 'success_login']);
         break;
     default:
+        // Unknown role: log out user immediately
+        session_unset();
+        session_destroy();
         redirect("login_page.php", ['status' => 'error_unknown_role']);
 }
-?>

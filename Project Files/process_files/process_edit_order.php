@@ -7,7 +7,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../auth_guard.php';
 
 // --------------------
-// 1. Handle only POST requests
+// 1. Allow only POST requests
 // --------------------
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['action_status'] = [
@@ -33,8 +33,10 @@ if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST
 // --------------------
 // 3. Validate required fields
 // --------------------
-$requiredFields = ['OID', 'user_id', 'order_status_id', 'item_id', 'colour_id', 
-                   'size_id', 'payment_id', 'address_id', 'item_qty', 'order_price'];
+$requiredFields = [
+    'OID', 'user_id', 'order_status_id', 'item_id', 'colour_id', 
+    'size_id', 'payment_id', 'address_id', 'item_qty', 'order_price'
+];
 
 foreach ($requiredFields as $field) {
     if (!isset($_POST[$field]) || $_POST[$field] === '') {
@@ -48,23 +50,23 @@ foreach ($requiredFields as $field) {
 }
 
 // --------------------
-// 4. Sanitize and assign
+// 4. Sanitize & assign
 // --------------------
-$OID = (int)$_POST['OID'];
-$user_id = $_POST['user_id'];
-$order_status_id = (int)$_POST['order_status_id'];
-$item_id = (int)$_POST['item_id'];
-$colour_id = (int)$_POST['colour_id'];
-$size_id = (int)$_POST['size_id'];
-$payment_id = (int)$_POST['payment_id'];
-$address_id = (int)$_POST['address_id'];
-$item_qty = (int)$_POST['item_qty'];
-$order_price = $_POST['order_price'];
+$OID           = (int) $_POST['OID'];
+$user_id       = trim($_POST['user_id']);
+$order_status_id = (int) $_POST['order_status_id'];
+$item_id       = (int) $_POST['item_id'];
+$colour_id     = (int) $_POST['colour_id'];
+$size_id       = (int) $_POST['size_id'];
+$payment_id    = (int) $_POST['payment_id'];
+$address_id    = (int) $_POST['address_id'];
+$item_qty      = (int) $_POST['item_qty'];
+$order_price   = (float) $_POST['order_price'];
 
 // --------------------
-// 5. Validate numeric price
+// 5. Validate numeric fields
 // --------------------
-if (!is_numeric($order_price) || $order_price < 0) {
+if ($order_price < 0) {
     $_SESSION['action_status'] = [
         'type' => 'error',
         'message' => "Order price must be a valid positive number."
@@ -73,9 +75,6 @@ if (!is_numeric($order_price) || $order_price < 0) {
     exit;
 }
 
-// --------------------
-// 6. Validate quantity
-// --------------------
 if ($item_qty < 1) {
     $_SESSION['action_status'] = [
         'type' => 'error',
@@ -86,7 +85,7 @@ if ($item_qty < 1) {
 }
 
 // --------------------
-// 7. Verify order exists
+// 6. Verify order exists
 // --------------------
 $check_stmt = $conn->prepare("SELECT OID FROM order_table WHERE OID = ?");
 $check_stmt->bind_param("i", $OID);
@@ -105,9 +104,9 @@ if ($check_result->num_rows === 0) {
 $check_stmt->close();
 
 // --------------------
-// 8. Verify foreign key references
+// 7. Verify foreign key references exist
 // --------------------
-$foreign_checks = [
+$foreign_refs = [
     ['table' => 'user', 'column' => 'UID', 'value' => $user_id, 'name' => 'User'],
     ['table' => 'order_stat', 'column' => 'OSID', 'value' => $order_status_id, 'name' => 'Order Status'],
     ['table' => 'item', 'column' => 'IID', 'value' => $item_id, 'name' => 'Item'],
@@ -117,32 +116,29 @@ $foreign_checks = [
     ['table' => 'address', 'column' => 'AID', 'value' => $address_id, 'name' => 'Address']
 ];
 
-foreach ($foreign_checks as $check) {
-    $fk_stmt = $conn->prepare("SELECT {$check['column']} FROM {$check['table']} WHERE {$check['column']} = ?");
+foreach ($foreign_refs as $ref) {
+    $stmt_fk = $conn->prepare("SELECT {$ref['column']} FROM {$ref['table']} WHERE {$ref['column']} = ?");
     
-    if ($check['column'] === 'UID') {
-        $fk_stmt->bind_param("s", $check['value']);
-    } else {
-        $fk_stmt->bind_param("i", $check['value']);
-    }
+    // Use string for user_id (UUID) and int for others
+    $ref['column'] === 'UID' ? $stmt_fk->bind_param("s", $ref['value']) : $stmt_fk->bind_param("i", $ref['value']);
     
-    $fk_stmt->execute();
-    $fk_result = $fk_stmt->get_result();
-    
-    if ($fk_result->num_rows === 0) {
+    $stmt_fk->execute();
+    $result_fk = $stmt_fk->get_result();
+
+    if ($result_fk->num_rows === 0) {
         $_SESSION['action_status'] = [
             'type' => 'error',
-            'message' => "{$check['name']} does not exist in the database."
+            'message' => "{$ref['name']} does not exist in the database."
         ];
-        $fk_stmt->close();
+        $stmt_fk->close();
         header("Location: ../edit_order.php?OID=" . urlencode($OID));
         exit;
     }
-    $fk_stmt->close();
+    $stmt_fk->close();
 }
 
 // --------------------
-// 9. Prepare update statement
+// 8. Prepare UPDATE statement
 // --------------------
 $stmt = $conn->prepare("
     UPDATE order_table
@@ -175,7 +171,7 @@ $stmt->bind_param(
 );
 
 // --------------------
-// 10. Execute and redirect
+// 9. Execute update and redirect
 // --------------------
 if ($stmt->execute()) {
     $_SESSION['action_status'] = [
@@ -187,8 +183,7 @@ if ($stmt->execute()) {
 } else {
     $errorMsg = $stmt->error;
 
-    // Handle foreign key constraint errors
-    if (strpos($errorMsg, 'foreign key') !== false || strpos($errorMsg, 'Cannot add or update') !== false) {
+    if (stripos($errorMsg, 'foreign key') !== false || stripos($errorMsg, 'Cannot add or update') !== false) {
         $errorMsg = "Invalid reference: One or more selected values do not exist in the database.";
     }
 
@@ -201,3 +196,4 @@ if ($stmt->execute()) {
 }
 
 $stmt->close();
+$conn->close();

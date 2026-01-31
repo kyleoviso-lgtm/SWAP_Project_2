@@ -7,7 +7,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../auth_guard.php';
 
 // --------------------
-// 1. Handle only POST requests
+// 1. Allow only POST requests
 // --------------------
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['action_status'] = [
@@ -35,7 +35,7 @@ if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST
 // --------------------
 $requiredFields = ['original_IID', 'IID', 'name', 'price', 'description', 'role_id'];
 foreach ($requiredFields as $field) {
-    if (!isset($_POST[$field]) || $_POST[$field] === '') {
+    if (empty($_POST[$field])) {
         $_SESSION['action_status'] = [
             'type' => 'error',
             'message' => "The field '$field' is required."
@@ -46,18 +46,18 @@ foreach ($requiredFields as $field) {
 }
 
 // --------------------
-// 4. Sanitize and assign
+// 4. Sanitize & assign
 // --------------------
-$original_IID = $_POST['original_IID'];
-$IID = $_POST['IID'];
-$name = $_POST['name'];
-$price = $_POST['price'];
-$description = $_POST['description'];
+$original_IID = trim($_POST['original_IID']);
+$IID          = trim($_POST['IID']);
+$name         = trim($_POST['name']);
+$price        = trim($_POST['price']);
+$description  = trim($_POST['description']);
 $availability = isset($_POST['availability']) ? (int)$_POST['availability'] : 0;
-$role_id = (int)$_POST['role_id'];
+$role_id      = (int)$_POST['role_id'];
 
 // --------------------
-// 5. Validate numeric price
+// 5. Validate numeric fields
 // --------------------
 if (!is_numeric($price) || $price < 0) {
     $_SESSION['action_status'] = [
@@ -68,8 +68,18 @@ if (!is_numeric($price) || $price < 0) {
     exit;
 }
 
+// Optional: Ensure IID format if using UUIDs or specific patterns
+// if (!preg_match('/^[a-zA-Z0-9_-]+$/', $IID)) {
+//     $_SESSION['action_status'] = [
+//         'type' => 'error',
+//         'message' => "Invalid Item ID format."
+//     ];
+//     header("Location: ../edit_item.php?IID=" . urlencode($original_IID));
+//     exit;
+// }
+
 // --------------------
-// 6. Prepare update statement
+// 6. Prepare UPDATE statement
 // --------------------
 $stmt = $conn->prepare("
     UPDATE item
@@ -101,9 +111,11 @@ if ($stmt->execute()) {
 } else {
     $errorMsg = $stmt->error;
 
-    // Handle foreign key constraint for changing IID
-    if (strpos($errorMsg, 'foreign key') !== false) {
+    // Handle foreign key constraints or duplicate IID
+    if (stripos($errorMsg, 'foreign key') !== false) {
         $errorMsg = "Cannot change Item ID because it is referenced by existing orders.";
+    } elseif (stripos($errorMsg, 'Duplicate') !== false) {
+        $errorMsg = "The new Item ID already exists. Choose a unique ID.";
     }
 
     $_SESSION['action_status'] = [
@@ -115,3 +127,4 @@ if ($stmt->execute()) {
 }
 
 $stmt->close();
+$conn->close();
