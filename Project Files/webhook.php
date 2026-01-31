@@ -3,11 +3,14 @@
 session_start();
 require_once 'db.php';
 require_once 'stripe-php-19.3.0/init.php';
+require_once 'key.php';
 
-\Stripe\Stripe::setApiKey('sk_test_51SsJVhD22va0abhHFZLNVHNvDjFXt2roZqcP0RAdvvszNkAfLp6FfWmgyM04uR8kumj4zDAQx93RYXg8TBh68eM0005th24rsC');
-$endpoint_secret = 'whsec_ds9NLrXrXWoGpxNuDjMOC3ceRe7gSfZd';
+// get keys (hide fm client side code)
+\Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
 
-/* ---------- VERIFY WEBHOOK ---------- */
+$endpoint_secret = STRIPE_WEBHOOK_SECRET;
+
+// verify webhook
 $payload = file_get_contents('php://input');
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 
@@ -23,28 +26,28 @@ if ($event->type !== 'checkout.session.completed') {
     exit;
 }
 
-/* ---------- SESSION ---------- */
+// session
 $session = $event->data->object;
 $session_full = \Stripe\Checkout\Session::retrieve(
     $session->id,
     ['expand' => ['payment_intent']]
 );
 
-/* ---------- USER ---------- */
+// user
 $user_id = $session_full->metadata->user_id ?? null;
 if (!$user_id) {
     http_response_code(400);
     exit('Missing user');
 }
 
-/* ---------- CART ---------- */
+//  cart
 $cart = json_decode($session_full->metadata->cart ?? '[]', true);
 if (!is_array($cart) || empty($cart)) {
     http_response_code(200);
     exit;
 }
 
-/* ---------- ADDRESS ---------- */
+// shipping addr
 $address_id = null;
 $addr = $session_full->customer_details->address ?? null;
 
@@ -65,7 +68,7 @@ if ($addr && !empty($addr->line1) && !empty($addr->country)) {
     $stmt->close();
 }
 
-/* ---------- PAYMENT ---------- */
+// payment
 $payment_id = null;
 $payment_token = $session_full->payment_intent;
 
@@ -75,15 +78,15 @@ $stmt->execute();
 $payment_id = $stmt->insert_id;
 $stmt->close();
 
-/* ---------- ORDER GROUPING ---------- */
+// order hash
 $order_hash = hash(
     'sha256',
     $user_id . json_encode($cart) . microtime(true) . bin2hex(random_bytes(8))
 );
 
-$cs = $session_full->id; // ONE checkout session ID for ALL rows
+$cs = $session_full->id; // 1 checkout session id for all rows
 
-/* ---------- INSERT LINE ITEMS ---------- */
+// insert items
 $stmt = $connection->prepare("
     INSERT INTO order_table
     (
@@ -107,7 +110,27 @@ foreach ($cart as $item) {
     $size_id   = (int)$item['size'];
     $colour_id = (int)$item['colour'];
     $qty       = (int)$item['qty'];
-    $price     = (float)$item['price'];
+        
+    // fetch real price from db
+    $stmtPrice = $connection->prepare("
+        SELECT i.price, s.size_price_multi
+        FROM item i
+        JOIN size s ON s.SID = ?
+        WHERE i.IID = ?
+        LIMIT 1
+    ");
+    $stmtPrice->bind_param('ii', $size_id, $item_id);
+    $stmtPrice->execute();
+    $priceRow = $stmtPrice->get_result()->fetch_assoc();
+    $stmtPrice->close();
+
+    if (!$priceRow) {
+        continue; // skip invalid item
+    }
+
+    $price = (float)$priceRow['price'] * (float)$priceRow['size_price_multi'];
+
+
 
     $stmt->bind_param(
         'siiiidssss',

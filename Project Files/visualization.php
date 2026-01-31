@@ -2,15 +2,13 @@
 
 require_once 'db.php';
 
-// --------------------
-// FILTER: ORDER TYPE
-// --------------------
+
+// filter by order type
 $type = $_GET['type'] ?? 'all';
 $status_ids = ($type === 'active') ? "1,2,3" : (($type === 'completed') ? "4,5" : "1,2,3,4,5");
 
-// --------------------
-// SQL: Get item sales per day
-// --------------------
+
+// sales per day
 $sql = "
 SELECT 
     DATE(order_time) AS order_date,
@@ -25,13 +23,11 @@ ORDER BY order_date ASC
 
 $result = $conn->query($sql);
 
-// --------------------
-// Transform data for Chart.js
-// --------------------
+// convert for chart.js
 $all_dates = [];
 $all_items = [];
 
-// Step 1: Collect all dates and items
+// get date and time
 while ($row = $result->fetch_assoc()) {
     $date = $row['order_date'];
     $item = $row['item_name'];
@@ -42,7 +38,7 @@ while ($row = $result->fetch_assoc()) {
     $all_items[$item][$date] = $qty;
 }
 
-// Step 2: Fill missing dates with 0 and ensure correct order
+// fill missing with 0 
 foreach ($all_items as $item_name => &$dates) {
     foreach ($all_dates as $date) {
         if (!isset($dates[$date])) $dates[$date] = 0;
@@ -51,7 +47,7 @@ foreach ($all_items as $item_name => &$dates) {
 }
 unset($dates);
 
-// Step 3: Prepare datasets for Chart.js
+// prep data for chartjs
 $colors = ['#5865F2','#F04747','#43B581','#FAA61A','#7289DA','#AA00FF','#FF6EC7','#00BFFF'];
 $datasets = [];
 $i = 0;
@@ -118,7 +114,7 @@ new Chart(ctx, {
             legend: {
                 labels: { 
                     color: '#ffffff',
-                    usePointStyle: true,   // legend uses dot style
+                    usePointStyle: true,   
                     pointStyle: 'circle'
                 }
             },

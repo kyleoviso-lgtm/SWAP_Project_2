@@ -4,25 +4,22 @@
 require_once 'db.php';
 require_once 'payment_flow.php';
 
-/**
- * SECURITY CHECKS
- */
 
-// Prevent users from skipping checkout
+// prevent users from skipping checkout
 require_checkout_ready();
 
-// Require login
+// require login
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: login_page.php');
     exit;
 }
 
-// Validate Stripe checkout session reference (from redirect)
+// validate stripe checkout session reference (from redirect)
 $checkout_session_id = $_GET['cs'] ?? null;
 
 if (
     !$checkout_session_id ||
-    !preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $checkout_session_id)
+    !preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $checkout_session_id) //validate against regex
 ) {
     http_response_code(400);
     exit('Invalid checkout session');
@@ -38,7 +35,7 @@ if (
 
 
 
-// Fetch the latest order hash for THIS user only
+// get the latest order hash for specific user 
 $order_hash = null;
 
 $stmt = $connection->prepare("
@@ -56,18 +53,22 @@ $stmt->bind_result($order_hash);
 $stmt->fetch();
 $stmt->close();
 
-// If no order found, something went wrong
+// error handle
 if (!$order_hash) {
     http_response_code(500);
     
     exit('Order not found');
 }
 
-// Clear cart and disable further checkout
+// clear cart and disable further checkout
 unset($_SESSION['cart']);
 disable_checkout();
 
-// Prevent refresh / replay
+// clear checkout lock
+unset($_SESSION['checkout_in_progress']);
+
+
+// prevent refresh 
 $_SESSION['success_seen_cs'] = $checkout_session_id;
 
 ?>

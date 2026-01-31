@@ -1,8 +1,10 @@
 <?php
 session_start();
+
+// db connect
 require_once 'db.php';
 
-
+// display order based on user hash (public - dont req login)
 $order_hash = trim($_GET['order_hash'] ?? '');
 $orders = [];
 
