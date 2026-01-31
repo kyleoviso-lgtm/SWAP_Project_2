@@ -1,28 +1,33 @@
 <?php
+
 require_once 'db.php';
-session_start();
 
-$user_id = $_SESSION['user_id'] ?? 'LOCAL_USER';
 
-$cart = [
-    [
-        'iid' => 1,
-        'size' => 1,
-        'colour' => 1,
-        'qty' => 2
-    ]
-];
+$user_id = $_SESSION['user_id'] ?? null;
+$cart    = $_SESSION['cart'] ?? null;
 
-// 1️ADDRESS (dummy)
+if (!$user_id || !is_array($cart) || empty($cart)) {
+    die('Missing user or cart');
+}
+
+// simulated addr data
+$line1   = '123 Local Test St';
+$line2   = '';
+$city    = 'Test City';
+$country = 'AU';
+$zip     = '0000';
+
 $stmt = $connection->prepare("
     INSERT INTO address (address_line_1, address_line_2, city, country, ZIP_code)
-    VALUES ('123 Test St', '', 'Test City', 'AU', '0000')
+    VALUES (?, ?, ?, ?, ?)
 ");
+$stmt->bind_param('sssss', $line1, $line2, $city, $country, $zip);
 $stmt->execute();
+
 $address_id = $stmt->insert_id;
 $stmt->close();
 
-// PAYMENT (dummy)
+// simulated payment data
 $fake_token = 'LOCAL_PAYMENT_' . uniqid();
 $stmt = $connection->prepare("INSERT INTO payment (token) VALUES (?)");
 $stmt->bind_param('s', $fake_token);
@@ -30,11 +35,16 @@ $stmt->execute();
 $payment_id = $stmt->insert_id;
 $stmt->close();
 
-// 3️ORDER HASH
-$order_hash = hash('sha256', uniqid('local_', true));
-$cs = 'LOCAL_SIMULATION';
 
-// 4INSERT ITEMS
+$order_hash = hash(
+    'sha256',
+    $user_id . json_encode($cart) . microtime(true)
+);
+
+$CS = 'LOCAL_SIMULATION_' . uniqid();
+
+
+// insert items
 $stmt = $connection->prepare("
     INSERT INTO order_table
     (
@@ -55,6 +65,12 @@ $stmt = $connection->prepare("
 
 foreach ($cart as $item) {
 
+    $item_id   = (int)$item['iid'];
+    $size_id   = (int)($item['size'] ?? 0);
+    $colour_id = (int)($item['colour'] ?? 0);
+    $qty       = max(1, (int)($item['qty'] ?? 1));
+
+    // fetch trusted price
     $stmtPrice = $connection->prepare("
         SELECT i.price, s.size_price_multi
         FROM item i
@@ -62,30 +78,34 @@ foreach ($cart as $item) {
         WHERE i.IID = ?
         LIMIT 1
     ");
-    $stmtPrice->bind_param('ii', $item['size'], $item['iid']);
+    $stmtPrice->bind_param('ii', $size_id, $item_id);
     $stmtPrice->execute();
     $priceRow = $stmtPrice->get_result()->fetch_assoc();
     $stmtPrice->close();
 
-    if (!$priceRow) continue;
+    if (!$priceRow) {
+        continue;
+    }
 
     $price = (float)$priceRow['price'] * (float)$priceRow['size_price_multi'];
+
 
     $stmt->bind_param(
         'siiiidssss',
         $user_id,
-        $item['iid'],
-        $item['size'],
-        $item['colour'],
-        $item['qty'],
+        $item_id,
+        $size_id,
+        $colour_id,
+        $qty,
         $price,
         $order_hash,
-        $cs,
+        $CS,            
         $address_id,
         $payment_id
     );
+
+
     $stmt->execute();
 }
 
 $stmt->close();
-
