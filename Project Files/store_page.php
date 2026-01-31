@@ -3,10 +3,11 @@ require_once 'bootstrap.php';
 require_once 'auth_guard.php';
 require_once 'user_info_fetcher.php';
 
-$userRole = $_SESSION['role']; // 'individual' or others
+$userRole = $_SESSION['role']; // chk for indiv or enterprise
 $userName = $_SESSION['username'];
 $userInitials = strtoupper(substr($userName, 0, 2));
 
+// filter based on role perms
 if ($userRole === 'individual') {
     $sql = "
         SELECT IID, name, price, description, availability
@@ -58,7 +59,7 @@ $conn->close();
 
 <div class="store-content">
 
-    <!-- FILTER SIDEBAR -->
+    <!-- filters -->
     <aside class="filters-section">
         <div class="section-header">
             <h2>Filters</h2>
@@ -94,7 +95,7 @@ $conn->close();
         </div>
     </aside>
 
-    <!-- PRODUCTS -->
+    <!-- items -->
     <section class="products-section">
         <div class="products-header">
             <h2>Products</h2>

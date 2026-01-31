@@ -1,6 +1,12 @@
 <?php
 
-require_once 'payment_flow.php'; // your payment/session handling file
+require_once 'payment_flow.php'; // payment/session handling file
+
+// csrf validation
+require_once 'csrf.php'; 
+
+require_once 'db.php';
+
 // Require login
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: login_page.php');
@@ -9,12 +15,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 
 
-$connection = new mysqli('localhost', 'root', '', 'mydb');
-if ($connection->connect_error) {
-    die('Database connection failed: ' . $connection->connect_error);
-}
-
-$userRole = $_SESSION['role']; // 'enterprise', 'regular', or 'individual'
+// validate user perms to view item since using iid in url
+$userRole = $_SESSION['role']; 
 $userName = $_SESSION['username'];
 
 $iid = filter_input(INPUT_GET, 'iid', FILTER_VALIDATE_INT);
@@ -196,10 +198,12 @@ addCartBtn.addEventListener('click', () => {
     formData.append('action', 'add');
     formData.append('iid', addCartBtn.dataset.iid);
     formData.append('size', selectedSize.value);
-    formData.append('size_text', selectedSize.text); // ✅ Correct text
+    formData.append('size_text', selectedSize.text); 
     formData.append('colour', selectedColour.value);
-    formData.append('colour_text', selectedColour.text); // ✅ Correct text
+    formData.append('colour_text', selectedColour.text); 
     formData.append('qty', 1);
+    formData.append('csrf_token', '<?= csrf_token() ?>');
+
 
     fetch('cart.php', { method: 'POST', body: formData })
         .then(res => res.json())
