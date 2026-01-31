@@ -115,9 +115,15 @@ $_SESSION['success_seen_cs'] = $checkout_session_id;
         Please keep this reference for your records.
     </p>
 
+    <a href="track.php" class="btn-continue">
+        Track Order
+    </a>
+    
     <a href="store_page.php" class="btn-continue">
         Continue Shopping
     </a>
+
+
 
 </div>
 
