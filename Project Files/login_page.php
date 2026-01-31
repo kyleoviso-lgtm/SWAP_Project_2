@@ -182,7 +182,7 @@ require_once 'bootstrap.php';
                 <!-- FOOTER -->
                 <!-- ========================= -->
                 <div class="form-footer">
-                    <p>Don't have an account? <a href="signup.php">Sign up</a></p>
+                    <p>Don't have an account? <a href="signup_page.php">Sign up</a></p>
                 </div>
 
             </div>
