@@ -149,21 +149,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             ?>
                 <div class="cart-item">
                     <div class="item-info">
-                        <p><strong><?= htmlspecialchars($item['name']) ?></strong></p>
+                        <h3 class="item-title"><?= htmlspecialchars($item['name']) ?></h3>
                         <p>Size: <?= htmlspecialchars($item['size_text']) ?></p>
                         <p>Colour: <?= htmlspecialchars($item['colour_text']) ?></p>
 
 
-                        <p>
+                        <p class="qty-row">
                             Qty:
-                            <button onclick="updateQty('<?= $key ?>', -1)">−</button>
-                            <?= $item['qty'] ?>
-                            <button onclick="updateQty('<?= $key ?>', 1)">+</button>
+                            <span class="qty-controls">
+                                <button type="button" class="qty-btn" onclick="updateQty('<?= $key ?>', -1)">−</button>
+                                <span class="qty-value"><?= $item['qty'] ?></span>
+                                <button type="button" class="qty-btn" onclick="updateQty('<?= $key ?>', 1)">+</button>
+                            </span>
                         </p>
 
                         <p>Price: $<?= number_format($itemTotal, 2) ?></p>
 
-                        <button onclick="removeItem('<?= $key ?>')">Remove</button>
+                        <button type="button" class="remove-btn" onclick="removeItem('<?= $key ?>')">Remove</button>
                     </div>
                 </div>
             <?php endforeach; ?>
