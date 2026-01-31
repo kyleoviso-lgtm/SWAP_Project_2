@@ -17,18 +17,27 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 // validate stripe checkout session reference (from redirect)
 $checkout_session_id = $_GET['cs'] ?? null;
 
+// check for local mode before validation
+$is_local_cs =
+    defined('LOCAL_MODE') &&
+    LOCAL_MODE === true &&
+    str_starts_with($checkout_session_id, 'LOCAL_SIMULATION_');
+
+
 if (
-    !$checkout_session_id ||
-    !preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $checkout_session_id) //validate against regex
+    !$is_local_cs &&
+    !preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $checkout_session_id)
 ) {
     http_response_code(400);
     exit('Invalid checkout session');
 }
 
-// local db for marking
-if (defined('LOCAL_MODE') && LOCAL_MODE === true) {
-    require_once 'local_order_insert.php'; }
 
+
+// local db for marking
+if ($is_local_cs) {
+    require_once 'local_order_insert.php';
+}
 
 
 if (
