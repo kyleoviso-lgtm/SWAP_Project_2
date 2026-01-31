@@ -1,62 +1,40 @@
 <?php
-// local_order_insert.php
-// Fallback: insert order locally when webhook DB ≠ website DB
+require_once 'db.php';
+session_start();
 
-if (!isset($_SESSION)) {
-    session_start();
-}
+$user_id = $_SESSION['user_id'] ?? 'LOCAL_USER';
 
-// dupe prevention
-if (!empty($_SESSION['orders_inserted'])) {
-    return;
-}
-$_SESSION['orders_inserted'] = true;
+$cart = [
+    [
+        'iid' => 1,
+        'size' => 1,
+        'colour' => 1,
+        'qty' => 2
+    ]
+];
 
-// session data
-$user_id = $_SESSION['user_id'] ?? null;
-$cart    = $_SESSION['cart'] ?? [];
-$cs      = $_GET['cs'] ?? null;
+// 1️ADDRESS (dummy)
+$stmt = $connection->prepare("
+    INSERT INTO address (address_line_1, address_line_2, city, country, ZIP_code)
+    VALUES ('123 Test St', '', 'Test City', 'AU', '0000')
+");
+$stmt->execute();
+$address_id = $stmt->insert_id;
+$stmt->close();
 
-if (!$user_id || !$cart || !$cs) {
-    return;
-}
-
-// pay
+// PAYMENT (dummy)
+$fake_token = 'LOCAL_PAYMENT_' . uniqid();
 $stmt = $connection->prepare("INSERT INTO payment (token) VALUES (?)");
-$stmt->bind_param('s', $cs);
+$stmt->bind_param('s', $fake_token);
 $stmt->execute();
 $payment_id = $stmt->insert_id;
 $stmt->close();
 
-// addr
-$address_id = null;
-if (!empty($_SESSION['shipping_address'])) {
-    $a = $_SESSION['shipping_address'];
+// 3️ORDER HASH
+$order_hash = hash('sha256', uniqid('local_', true));
+$cs = 'LOCAL_SIMULATION';
 
-    $stmt = $connection->prepare("
-        INSERT INTO address (address_line_1, address_line_2, city, country, ZIP_code)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-    $stmt->bind_param(
-        'sssss',
-        $a['line1'],
-        $a['line2'],
-        $a['city'],
-        $a['country'],
-        $a['zip']
-    );
-    $stmt->execute();
-    $address_id = $stmt->insert_id;
-    $stmt->close();
-}
-
-// hash
-$order_hash = hash(
-    'sha256',
-    $user_id . json_encode($cart) . microtime(true)
-);
-
-// insert
+// 4INSERT ITEMS
 $stmt = $connection->prepare("
     INSERT INTO order_table
     (
@@ -77,27 +55,37 @@ $stmt = $connection->prepare("
 
 foreach ($cart as $item) {
 
-    $item_id   = (int)$item['iid'];
-    $size_id   = (int)$item['size'];
-    $colour_id = (int)$item['colour'];
-    $qty       = (int)$item['qty'];
-    $price     = (float)$item['price'];
+    $stmtPrice = $connection->prepare("
+        SELECT i.price, s.size_price_multi
+        FROM item i
+        JOIN size s ON s.SID = ?
+        WHERE i.IID = ?
+        LIMIT 1
+    ");
+    $stmtPrice->bind_param('ii', $item['size'], $item['iid']);
+    $stmtPrice->execute();
+    $priceRow = $stmtPrice->get_result()->fetch_assoc();
+    $stmtPrice->close();
+
+    if (!$priceRow) continue;
+
+    $price = (float)$priceRow['price'] * (float)$priceRow['size_price_multi'];
 
     $stmt->bind_param(
         'siiiidssss',
         $user_id,
-        $item_id,
-        $size_id,
-        $colour_id,
-        $qty,
+        $item['iid'],
+        $item['size'],
+        $item['colour'],
+        $item['qty'],
         $price,
         $order_hash,
         $cs,
         $address_id,
         $payment_id
     );
-
     $stmt->execute();
 }
 
 $stmt->close();
+
