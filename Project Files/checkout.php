@@ -2,6 +2,10 @@
 session_start();
 require_once 'payment_flow.php';
 
+// db purely for checking for local mode
+require_once 'db.php'; 
+
+
 require_checkout_ready(); // prevent skipping cart
 
 // require login
@@ -62,12 +66,31 @@ foreach ($metadata_cart as $item) {
     ];
 }
 
+// check for local mode before creating session
+if (defined('LOCAL_MODE') && LOCAL_MODE === true) {
+
+    // generate simulated CS
+    $cs = 'LOCAL_SIMULATION_' . uniqid();
+
+    // store for downstream use
+    $_SESSION['checkout_session_id'] = $cs;
+
+    $success_url = "http://localhost/SWAP_Project_2/Project%20Files/pay.php?cs=$cs";
+
+
+
+
+// remote ver
+} else {
+    $success_url = 'http://localhost/SWAP_Project_2/Project%20Files/pay.php?cs={CHECKOUT_SESSION_ID}';
+}
+
 // stripe session
 $session = \Stripe\Checkout\Session::create([
     'payment_method_types' => ['card'],
     'line_items'           => $line_items,
     'mode'                 => 'payment',
-    'success_url'          => 'http://localhost/SWAP_Project_2/Project%20Files/pay.php?cs={CHECKOUT_SESSION_ID}',
+    'success_url'          => $success_url,
     'cancel_url'           => 'http://localhost/SWAP_Project_2/Project%20Files/cart.php?checkout_cancelled=1',
     'shipping_address_collection' => [
         'allowed_countries' => ['SG'],

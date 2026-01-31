@@ -41,8 +41,13 @@ $order_hash = hash(
     $user_id . json_encode($cart) . microtime(true)
 );
 
-$CS = 'LOCAL_SIMULATION_' . uniqid();
+// use local cs 
+$CS = $_GET['cs'] ?? $_SESSION['checkout_session_id'] ?? null;
 
+// validate
+if (!$CS) {
+    die('Missing checkout session reference');
+}
 
 // insert items
 $stmt = $connection->prepare("
