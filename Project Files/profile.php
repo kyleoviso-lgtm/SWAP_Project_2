@@ -84,6 +84,7 @@ function statusClass($status) {
     <meta charset="UTF-8">
     <title>User Profile</title>
     <link rel="stylesheet" href="css/profile-styles.css">
+    <link rel="stylesheet" href="css/track.css">
 </head>
 <body>
 
@@ -179,6 +180,87 @@ function statusClass($status) {
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- ORDER TRACKING (public hash search) -->
+        <div class="section-separator"></div>
+        <div class="track-container">
+            <h3>Track Your Order</h3>
+            <form method="get" class="search-form">
+                <input
+                    type="text"
+                    name="order_hash"
+                    placeholder="Enter Order Hash"
+                    value="<?= htmlspecialchars($_GET['order_hash'] ?? '') ?>"
+                    required
+                    style="padding:8px; width:60%; border:1px solid #ccc; border-radius:5px;"
+                >
+                <button type="submit" style="padding:8px 12px;">Track</button>
+            </form>
+
+            <?php
+            // If user searched for an order hash, query and display it
+            if (!empty($_GET['order_hash'])):
+                $order_hash = trim($_GET['order_hash']);
+                $trackSql = "
+                    SELECT 
+                        o.order_hash,
+                        o.order_time,
+                        o.item_qty,
+                        o.order_price,
+                        os.order_status,
+                        i.name AS item_name,
+                        i.description AS item_desc,
+                        c.name AS color_name,
+                        s.size AS size_name
+                    FROM order_table o
+                    JOIN item i ON o.item_id = i.IID
+                    JOIN colour c ON o.colour_id = c.CID
+                    JOIN size s ON o.size_id = s.SID
+                    JOIN order_stat os ON o.order_status_id = os.OSID
+                    WHERE o.order_hash = ?
+                    ORDER BY o.OID ASC
+                ";
+                $stmt = $conn->prepare($trackSql);
+                $stmt->bind_param('s', $order_hash);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $foundOrders = $result->fetch_all(MYSQLI_ASSOC);
+                $stmt->close();
+
+                if (empty($foundOrders)):
+            ?>
+                <p class="no-orders" style="color:red;">No order found for this reference.</p>
+            <?php else:
+                    $orderTime = $foundOrders[0]['order_time'];
+                    $status = $foundOrders[0]['order_status'];
+                    $total = 0;
+                    foreach ($foundOrders as $o) {
+                        $total += $o['order_price'] * $o['item_qty'];
+                    }
+            ?>
+                <div class="order-summary">
+                    <p><strong>Order Hash:</strong> <?= htmlspecialchars($order_hash) ?></p>
+                    <p><strong>Date:</strong> <?= date("d M Y H:i", strtotime($orderTime)) ?></p>
+                    <p><strong>Status:</strong> <?= htmlspecialchars($status) ?></p>
+                    <p><strong>Total:</strong> $<?= number_format($total, 2) ?></p>
+                </div>
+
+                <div class="orders-grid" style="display:grid; gap:10px;">
+                    <?php foreach ($foundOrders as $order): ?>
+                        <div class="order-card">
+                            <p><strong>Item:</strong> <?= htmlspecialchars($order['item_name']) ?></p>
+                            <p><?= htmlspecialchars($order['item_desc']) ?></p>
+                            <p><strong>Color:</strong> <?= htmlspecialchars($order['color_name']) ?></p>
+                            <p><strong>Size:</strong> <?= htmlspecialchars($order['size_name']) ?></p>
+                            <p><strong>Qty:</strong> <?= (int)$order['item_qty'] ?></p>
+                            <p><strong>Line Total:</strong>
+                                $<?= number_format($order['order_price'] * $order['item_qty'], 2) ?>
+                            </p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; endif; ?>
         </div>
 
         <!-- Admin Dashboard button (only for admin & staff) -->

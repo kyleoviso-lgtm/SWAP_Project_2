@@ -22,9 +22,9 @@ h1 {
 
 .search-form {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
-    margin-bottom: 32px;
+    margin-bottom: 2px;
 }
 
 .search-form input {
@@ -52,6 +52,17 @@ h1 {
 
 .search-form button:hover {
     background-color: #4752c4;
+}
+
+.order-summary {
+    padding: 25px 20px;
+    margin: 10px 0px;
+
+    width: fit-content;
+
+    background-color: #36393f;
+    border: #202225 1px solid;
+    border-radius: 12px;
 }
 
 .no-orders {
