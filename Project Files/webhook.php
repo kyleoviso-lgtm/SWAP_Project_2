@@ -84,7 +84,7 @@ $order_hash = hash(
     $user_id . json_encode($cart) . microtime(true) . bin2hex(random_bytes(8))
 );
 
-$cs = $session_full->id; // 1 checkout session id for all rows
+$CS = $session_full->id; // 1 checkout session id for all rows
 
 // insert items
 $stmt = $connection->prepare("
@@ -141,7 +141,7 @@ foreach ($cart as $item) {
         $qty,
         $price,
         $order_hash,
-        $cs,
+        $CS,
         $address_id,
         $payment_id
     );

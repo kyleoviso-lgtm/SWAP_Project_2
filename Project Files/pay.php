@@ -25,6 +25,12 @@ if (
     exit('Invalid checkout session');
 }
 
+// local db for marking
+if (defined('LOCAL_MODE') && LOCAL_MODE === true) {
+    require_once 'local_order_insert.php'; }
+
+
+
 if (
     isset($_SESSION['success_seen_cs']) &&
     $_SESSION['success_seen_cs'] === $checkout_session_id
