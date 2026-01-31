@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 30, 2026 at 04:01 PM
+-- Generation Time: Jan 31, 2026 at 11:38 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -85,13 +85,13 @@ INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`, `role
 (2, 'Test PC 2', 100.42, 'PC from 2019 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 1, 3),
 (91, 'test PC 23', 803.21, 'testpc23', 1, 4),
 (201, 'Test PC', 1023.24, 'This PC is so trash that even Om wouldn\'t use it as a bomb', 0, 4),
-(893, 'Test PC 123', 1842.32, 'TestPC123', 1, 1),
-(901, 'Test PC 345', 1024.94, 'Test PC 345', 0, 1),
+(893, 'Test PC 123', 1842.32, 'TestPC123', 0, 1),
+(901, 'Test PC 345', 1024.94, 'Test PC 345', 0, 3),
 (903, 'My own PC', 958.23, 'My personal PC', 0, 1),
 (905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1, 1),
 (906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1, 1),
 (907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1, 1),
-(908, 'Mass Produca PC', 0.01, 'Whatever', 1, 3),
+(908, 'Mass Produca PC', 0.01, 'Whatever', 1, 2),
 (909, 'test PC 99', 1560.23, 'High performance PC with powerful CPU', 1, 4);
 
 -- --------------------------------------------------------
@@ -150,16 +150,17 @@ CREATE TABLE `order_table` (
   `item_qty` int(11) NOT NULL,
   `order_time` timestamp NOT NULL DEFAULT current_timestamp(),
   `order_hash` varchar(45) NOT NULL,
-  `order_price` decimal(10,2) NOT NULL
+  `order_price` decimal(10,2) NOT NULL,
+  `CS` varchar(255) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `order_table`
 --
 
-INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colour_id`, `size_id`, `payment_id`, `address_id`, `item_qty`, `order_time`, `order_hash`, `order_price`) VALUES
-(12, '1', 4, 2, 1, 2, 1, 1, 12, '2026-01-21 03:34:52', '182845', 104.00),
-(15, '1', 5, 906, 1, 1, 1, 1, 1, '2026-01-21 03:36:13', '12498141', 109.34);
+INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colour_id`, `size_id`, `payment_id`, `address_id`, `item_qty`, `order_time`, `order_hash`, `order_price`, `CS`) VALUES
+(12, '1', 4, 2, 1, 2, 1, 1, 12, '2026-01-21 03:34:52', '182845', 104.00, '1'),
+(15, '1', 5, 906, 1, 1, 1, 1, 1, '2026-01-21 03:36:13', '12498141', 109.34, '1');
 
 -- --------------------------------------------------------
 
@@ -169,7 +170,7 @@ INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colo
 
 CREATE TABLE `payment` (
   `PID` int(11) NOT NULL,
-  `token` int(45) NOT NULL
+  `token` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -177,7 +178,7 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`PID`, `token`) VALUES
-(1, 123456);
+(1, '123456');
 
 -- --------------------------------------------------------
 
@@ -466,7 +467,7 @@ ALTER TABLE `user_stat`
 -- Constraints for table `item`
 --
 ALTER TABLE `item`
-  ADD CONSTRAINT `fk_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`RID`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`RID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `item_audit_logging`
