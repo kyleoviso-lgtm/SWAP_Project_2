@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 31, 2026 at 11:38 AM
+-- Generation Time: Jan 31, 2026 at 01:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -41,7 +41,12 @@ CREATE TABLE `address` (
 --
 
 INSERT INTO `address` (`AID`, `address_line_1`, `address_line_2`, `city`, `country`, `ZIP_code`) VALUES
-(1, 'John Avenue', '#03-09', 'Singapore', 'Singapore', 123456);
+(1, 'John Avenue', '#03-09', 'Singapore', 'Singapore', 123456),
+(2, '123 Test St', '', 'Test City', 'AU', 0),
+(3, '123 Test St', '', 'Test City', 'AU', 0),
+(4, '123 Local Test St', '', 'Test City', 'AU', 0),
+(5, '123 Local Test St', '', 'Test City', 'AU', 0),
+(6, '123 Local Test St', '', 'Test City', 'AU', 0);
 
 -- --------------------------------------------------------
 
@@ -91,7 +96,7 @@ INSERT INTO `item` (`IID`, `name`, `price`, `description`, `availability`, `role
 (905, 'Test PC 12', 1028.32, 'Another Test PC, Their piling', 1, 1),
 (906, 'Bomb PC', 1.00, 'Om\'s Bomb PC', 1, 1),
 (907, 'Super Mega DDR5 abuser', 99999.00, 'powerholic', 1, 1),
-(908, 'Mass Produca PC', 0.01, 'Whatever', 1, 2),
+(908, 'Mass Produca PC', 20.00, 'Cheap PC for hundreds of employees', 1, 4),
 (909, 'test PC 99', 1560.23, 'High performance PC with powerful CPU', 1, 4);
 
 -- --------------------------------------------------------
@@ -160,7 +165,10 @@ CREATE TABLE `order_table` (
 
 INSERT INTO `order_table` (`OID`, `user_id`, `order_status_id`, `item_id`, `colour_id`, `size_id`, `payment_id`, `address_id`, `item_qty`, `order_time`, `order_hash`, `order_price`, `CS`) VALUES
 (12, '1', 4, 2, 1, 2, 1, 1, 12, '2026-01-21 03:34:52', '182845', 104.00, '1'),
-(15, '1', 5, 906, 1, 1, 1, 1, 1, '2026-01-21 03:36:13', '12498141', 109.34, '1');
+(15, '1', 5, 906, 1, 1, 1, 1, 1, '2026-01-21 03:36:13', '12498141', 109.34, '1'),
+(16, 'ab957136-fc91-11f0-90b0-a05950b924a8', 1, 907, 1, 3, 5, 4, 1, '2026-01-31 11:40:17', '2283e1683973e28fff62b348f95d9e8bb9ed851cca4f1', 119998.80, 'LOCAL_SIMULATION_697dea211f036'),
+(17, 'ab957136-fc91-11f0-90b0-a05950b924a8', 1, 907, 1, 3, 6, 5, 1, '2026-01-31 11:43:58', '705b9be2c8137f97cffa678a8b87546794d3ebe710c95', 119998.80, 'LOCAL_SIMULATION_697deafed95fd'),
+(18, 'ab957136-fc91-11f0-90b0-a05950b924a8', 1, 907, 1, 3, 7, 6, 1, '2026-01-31 12:08:31', 'ecd6291e9a4379342650583a223352946ba2a9ca82279', 119998.80, 'LOCAL_SIMULATION_697df07d93812');
 
 -- --------------------------------------------------------
 
@@ -178,7 +186,13 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`PID`, `token`) VALUES
-(1, '123456');
+(1, '123456'),
+(2, 'cs_test_a1hTxINIqRNHQu9mMWLDqQetWQk1fWyuiLfxE'),
+(3, 'LOCAL_PAYMENT_697de6462112c'),
+(4, 'LOCAL_PAYMENT_697de799a542a'),
+(5, 'LOCAL_PAYMENT_697dea211dd7f'),
+(6, 'LOCAL_PAYMENT_697deafed820f'),
+(7, 'LOCAL_PAYMENT_697df0bf5dd2b');
 
 -- --------------------------------------------------------
 
@@ -397,7 +411,7 @@ ALTER TABLE `user_stat`
 -- AUTO_INCREMENT for table `address`
 --
 ALTER TABLE `address`
-  MODIFY `AID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `AID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `colour`
@@ -427,13 +441,13 @@ ALTER TABLE `order_stat`
 -- AUTO_INCREMENT for table `order_table`
 --
 ALTER TABLE `order_table`
-  MODIFY `OID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `OID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `PID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `PID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `roles`
