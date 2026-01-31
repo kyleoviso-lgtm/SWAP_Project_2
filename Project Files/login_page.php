@@ -1,3 +1,7 @@
+<?php
+// Start session for CSRF token
+require_once 'bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,35 +54,56 @@
                         $message = '';
 
                         switch ($status) {
-                            // --- Success ---
+                            // --- Success Messages ---
                             case 'success_signup':
-                                $message = '✅ Account created successfully. Please log in.';
+                                $message = '✅ Account created successfully! Please log in.';
+                                break;
+                            
+                            case 'logged_out':
+                                $message = '✅ You have been logged out successfully.';
+                                break;
+
+                            case 'password_reset_success':
+                                $message = '✅ Password reset successful! Please log in with your new password.';
                                 break;
 
                             // --- Login Errors ---
                             case 'error_invalid_credentials':
-                                $message = '⚠️ Invalid email or password.';
+                                $message = '⚠️ Invalid email or password. Please try again.';
                                 break;
 
                             case 'error_account_inactive':
-                                $message = '⚠️ Your account is not active yet.';
+                                $message = '⚠️ Your account is not active. Please check your email for activation instructions.';
                                 break;
 
-                            // --- Signup Errors (fallbacks) ---
                             case 'error_missing_fields':
                                 $message = '⚠️ Please fill in all required fields.';
                                 break;
 
-                            case 'error_invalid_email':
-                                $message = '⚠️ Invalid email address.';
+                            case 'error_csrf_invalid':
+                                $message = '⚠️ Invalid security token. Please try again.';
                                 break;
 
-                            case 'error_duplicate_user':
-                                $message = '⚠️ An account with this email already exists.';
+                            case 'error_unknown_role':
+                                $message = '⚠️ Your account role is not recognized. Please contact support.';
+                                break;
+
+                            // --- General Errors ---
+                            case 'error_invalid_request':
+                                $message = '⚠️ Invalid request method.';
                                 break;
 
                             case 'error_db':
-                                $message = '⚠️ A database error occurred. Please try again.';
+                                $message = '⚠️ A database error occurred. Please try again later.';
+                                break;
+
+                            // --- Session/Auth Errors ---
+                            case 'error_not_logged_in':
+                                $message = '⚠️ Please log in to continue.';
+                                break;
+
+                            case 'error_session_expired':
+                                $message = '⚠️ Your session has expired. Please log in again.';
                                 break;
 
                             default:
@@ -103,6 +128,9 @@
                 <!-- LOGIN FORM -->
                 <!-- ========================= -->
                 <form class="login-form" action="process_files/process_login.php" method="POST">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input 
@@ -130,7 +158,7 @@
                             <input type="checkbox" name="remember">
                             <span class="checkbox-label">Remember me</span>
                         </label>
-                        <a href="#" class="forgot-link">Forgot password?</a>
+                        <a href="forgot_password.php" class="forgot-link">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn-primary">Sign In</button>
@@ -154,7 +182,7 @@
                 <!-- FOOTER -->
                 <!-- ========================= -->
                 <div class="form-footer">
-                    <p>Don't have an account? <a href="signup_page.php">Sign up</a></p>
+                    <p>Don't have an account? <a href="signup.php">Sign up</a></p>
                 </div>
 
             </div>

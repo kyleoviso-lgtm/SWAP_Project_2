@@ -1,10 +1,9 @@
 <?php
-// process_logout.php
+// process_files/process_logout.php
 
 // --------------------
-// GLOBAL PARENT DIRECTORY
+// PARENT DIRECTORY
 // --------------------
-// Go up one level from this script (process_files) to project root
 $PARENT_DIR = dirname(dirname($_SERVER['PHP_SELF']));
 
 // --------------------
@@ -32,3 +31,4 @@ if (ini_get("session.use_cookies")) {
 // --------------------
 header("Location: {$PARENT_DIR}/login_page.php?status=logged_out");
 exit();
+?>

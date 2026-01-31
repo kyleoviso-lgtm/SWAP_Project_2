@@ -1,23 +1,16 @@
 <?php
-// process_edit_user.php
+// process_files/process_edit_user.php
 
 // --------------------
-// GLOBAL PARENT DIRECTORY
+// BOOTSTRAP & SESSION
+// --------------------
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../auth_guard.php';
+
+// --------------------
+// PARENT DIRECTORY
 // --------------------
 $PARENT_DIR = dirname(dirname($_SERVER['PHP_SELF']));
-
-// --------------------
-// Database connection
-// --------------------
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "mydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // --------------------
 // Helper function for redirect
@@ -34,7 +27,21 @@ function redirect($file, $params = []) {
 }
 
 // --------------------
-// Get POST data safely
+// 1. Handle only POST requests
+// --------------------
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    redirect("dashboard_users.php", ['status' => 'error_invalid_request']);
+}
+
+// --------------------
+// 2. CSRF TOKEN VALIDATION
+// --------------------
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    redirect("dashboard_users.php", ['status' => 'error_csrf_invalid']);
+}
+
+// --------------------
+// 3. Get POST data safely
 // --------------------
 $UID = $_POST['UID'] ?? '';
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
@@ -47,7 +54,7 @@ $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 // --------------------
-// Basic validations
+// 4. Basic validations
 // --------------------
 if (!$UID || !$username || !$email || !$role_ID || !$status_ID) {
     redirect("edit_user.php", ['UID' => $UID, 'status' => 'error_missing']);
@@ -62,7 +69,7 @@ if ($password && $password !== $confirm_password) {
 }
 
 // --------------------
-// Start building SQL dynamically
+// 5. Start building SQL dynamically
 // --------------------
 $sql = "UPDATE user SET username = ?, email = ?, role_ID = ?, status_ID = ?";
 $params = [$username, $email, $role_ID, $status_ID];
@@ -99,7 +106,7 @@ $types .= "s";
 $params[] = $UID;
 
 // --------------------
-// Prepare and execute
+// 6. Prepare and execute
 // --------------------
 $stmt = $conn->prepare($sql);
 if ($stmt === false) {
@@ -110,15 +117,13 @@ if ($stmt === false) {
 $stmt->bind_param($types, ...$params);
 
 // --------------------
-// Execute and redirect
+// 7. Execute and redirect
 // --------------------
 if ($stmt->execute()) {
-    // Success redirect
     $stmt->close();
     $conn->close();
     redirect("dashboard_users.php", ['status' => 'success_edit']);
 } else {
-    // Failure redirect
     $stmt->close();
     $conn->close();
     redirect("dashboard_users.php", ['status' => 'error_db']);

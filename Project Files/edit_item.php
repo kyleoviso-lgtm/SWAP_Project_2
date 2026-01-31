@@ -44,6 +44,20 @@ $roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RID ASC");
     <?php include 'sidebar.php'; ?>
 
     <main class="main-content">
+        
+        <?php if (isset($_SESSION['action_status'])): ?>
+            <?php
+            $type = $_SESSION['action_status']['type'];
+            $bannerClass = ($type === 'success') ? 'success-banner' : 'error-banner';
+            ?>
+            <div class="<?php echo $bannerClass; ?>">
+                <?php 
+                echo htmlspecialchars($_SESSION['action_status']['message']); 
+                unset($_SESSION['action_status']);
+                ?>
+            </div>
+        <?php endif; ?>
+
         <header class="topbar">
             <div class="topbar-left">
                 <button class="back-btn" onclick="window.location.href='dashboard_product_management.php'">
@@ -72,6 +86,8 @@ $roles = $conn->query("SELECT RID, RoleName FROM roles ORDER BY RID ASC");
                     </div>
 
                     <form method="POST" action="process_files/process_edit_item.php" class="edit-item-form">
+                        <!-- CSRF Token -->
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="original_IID" value="<?php echo htmlspecialchars($item['IID']); ?>">
 
                         <div class="form-row">

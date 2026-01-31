@@ -1,18 +1,15 @@
 <?php
-session_start();
+// process_files/process_login.php
 
 // --------------------
-// GLOBAL PARENT DIRECTORY
+// BOOTSTRAP & SESSION
+// --------------------
+require_once __DIR__ . '/../bootstrap.php';
+
+// --------------------
+// PARENT DIRECTORY
 // --------------------
 $PARENT_DIR = dirname(dirname($_SERVER['PHP_SELF']));
-
-// --------------------
-// Database connection
-// --------------------
-$conn = new mysqli("localhost", "root", "", "mydb");
-if ($conn->connect_error) {
-    die("Connection failed: " . htmlspecialchars($conn->connect_error));
-}
 
 // --------------------
 // Helper function for redirect
@@ -29,24 +26,34 @@ function redirect($file, $params = []) {
 }
 
 // --------------------
-// Only allow POST
+// 1. Only allow POST
 // --------------------
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     redirect("login_page.php", ['status' => 'error_invalid_request']);
 }
 
+// --------------------
+// 2. CSRF TOKEN VALIDATION
+// --------------------
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    redirect("login_page.php", ['status' => 'error_csrf_invalid']);
+}
+
+// --------------------
+// 3. Get input
+// --------------------
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
 // --------------------
-// Basic validation
+// 4. Basic validation
 // --------------------
 if (empty($email) || empty($password)) {
     redirect("login_page.php", ['status' => 'error_missing_fields']);
 }
 
 // --------------------
-// Fetch user by email
+// 5. Fetch user by email
 // --------------------
 $stmt = $conn->prepare("
     SELECT u.UID, u.username, u.email, u.password_hash, r.RoleName, s.status_name
@@ -67,29 +74,35 @@ if ($result->num_rows === 0) {
 $user = $result->fetch_assoc();
 
 // --------------------
-// Check password
+// 6. Check password
 // --------------------
 if (!password_verify($password, $user['password_hash'])) {
     redirect("login_page.php", ['status' => 'error_invalid_credentials']);
 }
 
 // --------------------
-// Check if account is active
+// 7. Check if account is active
 // --------------------
 if (strtolower($user['status_name']) !== 'active') {
     redirect("login_page.php", ['status' => 'error_account_inactive']);
 }
 
 // --------------------
-// Login successful — create session
+// 8. Login successful - create session
 // --------------------
 $_SESSION['user_id'] = $user['UID'];
 $_SESSION['username'] = $user['username'];
 $_SESSION['role'] = strtolower($user['RoleName']);
 $_SESSION['logged_in'] = true;
 
+// Regenerate session ID to prevent session fixation
+session_regenerate_id(true);
+
+// Regenerate CSRF token after login
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
 // --------------------
-// Redirect based on role
+// 9. Redirect based on role
 // --------------------
 switch ($_SESSION['role']) {
     case 'admin':
